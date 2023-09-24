@@ -1,8 +1,8 @@
 import MsiRequest from './request'
-import { BASE_URL, TIME_OUT } from './config'
+import { BASE_URL } from './config'
 const msiRequest = new MsiRequest({
   baseURL: BASE_URL,
-  timeout: TIME_OUT,
+  // timeout: TIME_OUT,
   interceptors: {
     requestInterceptor(config) {
       return config
@@ -14,6 +14,9 @@ const msiRequest = new MsiRequest({
       return result
     },
     responseInterceptorCatch(error) {
+      if (error.response.status == 401) {
+        window.location.href = '#/login'
+      }
       return error
     }
   }

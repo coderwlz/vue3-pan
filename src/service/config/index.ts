@@ -1,2 +1,2 @@
-export const BASE_URL = ''
-export const TIME_OUT = 3000
+export const BASE_URL = '/w'
+export const TIME_OUT = ''

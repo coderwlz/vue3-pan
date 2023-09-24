@@ -3,17 +3,128 @@
   --w-c-white: #ffffff;
 }
 
-*, body {
+*,
+body {
   margin: 0;
   -webkit-overflow-scrolling: touch;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+  vertical-align: middle;
 }
 
-html,body,#app {
+html,
+body,
+#app {
   padding: 0;
   margin: 0;
   width: 100%;
   height: 100%;
 }
 
+body {
+  height: 100%;
+  font-family:
+    SFUIText,
+    PingFangSC-Regular,
+    Helvetica Neue,
+    Helvetica,
+    Arial,
+    sans-serif;
+  color: #333;
+  background-color: #fff;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  -webkit-tap-highlight-color: transparent;
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+button,
+html,
+input,
+select,
+textarea {
+  font-family:
+    SFUIText,
+    PingFangSC-Regular,
+    Helvetica Neue,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+ol,
+ul {
+  list-style: none outside none;
+}
+
+dd,
+dl,
+li,
+ol,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+.cursor {
+  cursor: pointer;
+}
+
+.u-button {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+  -webkit-appearance: none;
+  text-align: center;
+  box-sizing: border-box;
+  outline: 0;
+  margin: 0;
+  transition: 0.1s;
+  font-weight: 500;
+  padding: 12px 36px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.u-input {
+  position: relative;
+  font-size: 14px;
+  display: inline-block;
+  width: 100%;
+}
+
+.u-input__inner {
+  -webkit-appearance: none;
+  background-color: #fff;
+  background-image: none;
+  border-radius: 4px;
+  border: 1px solid #dcdfe6;
+  box-sizing: border-box;
+  color: #03081a;
+  display: inline-block;
+  font-size: inherit;
+  height: 40px;
+  line-height: 40px;
+  outline: 0;
+  padding: 0 12px;
+  transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  width: 100%;
+}
