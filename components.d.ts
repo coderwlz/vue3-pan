@@ -9,11 +9,9 @@ declare module 'vue' {
   export interface GlobalComponents {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    'X-[item.icon]': typeof import('~icons/x/[item.icon]')['default']
     XAudio: typeof import('~icons/x/audio')['default']
     XChuanshuliebiao: typeof import('~icons/x/chuanshuliebiao')['default']
     XEllipsisV: typeof import('~icons/x/ellipsis-v')['default']
-    XLogin: typeof import('~icons/x/login')['default']
     XQita: typeof import('~icons/x/qita')['default']
     XShipin: typeof import('~icons/x/shipin')['default']
     XTupian: typeof import('~icons/x/tupian')['default']
