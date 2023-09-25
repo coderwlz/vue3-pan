@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useUploaderStore } from '/src/stores/uploader'
+import { useUploaderStore } from '@/stores/uploader'
 import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
 import { sizeTostr, timestampToTime } from '@/utils'
+import noneView from '@/components/home/none.vue'
+
 const uploaderStore = useUploaderStore()
 
 const fileStore = useFileStore()
@@ -71,6 +73,11 @@ const type_list = ref([
             </template>
           </div>
         </div>
+        <div class="nav-divider"></div>
+
+        <div class="file-item cursor" style="font-size: 14px; font-weight: 700">
+          回收站
+        </div>
       </div>
       <div class="sub-bottom"></div>
     </div>
@@ -107,7 +114,7 @@ const type_list = ref([
           <div class="file-header-title">全部文件</div>
         </div>
         <div class="pan-table">
-          <div class="pan-table-header">
+          <div class="pan-table-header" v-if="list.length">
             <table style="width: 100%">
               <colgroup>
                 <col width="8%" />
@@ -150,7 +157,7 @@ const type_list = ref([
               </thead>
             </table>
           </div>
-          <div class="pan-table-body">
+          <div class="pan-table-body" v-if="list.length">
             <table style="width: 100%">
               <colgroup>
                 <col width="8%" />
@@ -237,6 +244,7 @@ const type_list = ref([
               </tbody>
             </table>
           </div>
+          <none-view />
         </div>
       </div>
     </div>
@@ -260,6 +268,13 @@ const type_list = ref([
 }
 .is-open {
   transform: rotateZ(270deg);
+}
+.nav-divider {
+  margin-left: 30px;
+  display: inline-block;
+  width: 70%;
+  height: 1px;
+  background-color: #f1f2f4;
 }
 .main {
   height: 100%;

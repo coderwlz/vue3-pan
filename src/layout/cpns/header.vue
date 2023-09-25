@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useUploaderStore } from '/src/stores/uploader'
+import { useUploaderStore } from '@/stores/uploader'
 import { storeToRefs } from 'pinia'
 import { sizeTostr, timestampToTime, renderSize } from '@/utils'
+import { useElementHover } from '@vueuse/core'
+
+const myHoverableElement = ref()
+const isHovered = useElementHover(myHoverableElement)
 
 const uploaderStore = useUploaderStore()
 
@@ -36,7 +40,9 @@ onUnmounted(() => {
 
 <template>
   <div class="p-header">
-    <div class="header-left">网盘</div>
+    <div class="header-left">
+      <img src="/src/assets/icons/logo.svg" alt="" />网盘
+    </div>
     <div class="header-content"></div>
     <div class="header-right">
       <a title="传输列表" class="upload-transfer_list" @click="openList"
@@ -110,7 +116,13 @@ onUnmounted(() => {
       <div>
         <img class="avater cursor" src="/src/assets/img/avater.webp" alt="" />
       </div>
-      <x-ellipsis-v class="icons cursor" />
+      <div ref="myHoverableElement" class="ellipsis">
+        <x-ellipsis-v class="icons cursor" />
+        <!-- <div class="ellipsis-body"></div> -->
+        <div class="ellipsis-body" v-if="isHovered">
+          <div></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -141,6 +153,13 @@ a {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.header-left {
+  font-size: 30px;
+  img {
+    width: 42px;
+    margin-right: 8px;
+  }
 }
 .icon {
   width: 14px;
@@ -337,6 +356,40 @@ a {
         }
       }
     }
+  }
+}
+
+.ellipsis {
+  position: relative;
+  padding: 0 5px;
+}
+.ellipsis-body {
+  position: absolute;
+  width: 130px;
+  height: 64px;
+  background: #fff;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.16);
+  top: 32px;
+  right: 13px;
+  &::before {
+    position: absolute;
+    right: 8px;
+    top: -5px;
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    transform: rotate(135deg);
+    box-shadow: 1px -2px 5px rgba(0, 0, 0, 0.2);
+  }
+  &::after {
+    position: absolute;
+    right: 5px;
+    top: 0px;
+    content: '';
+    width: 20px;
+    height: 20px;
+    background: #fff;
   }
 }
 </style>

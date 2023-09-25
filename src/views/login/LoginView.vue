@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { login } from '/src/service/modules/login'
+import { login } from '@/service/modules/login'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -22,7 +22,9 @@ const submit = async (e: any) => {
 <template>
   <div class="pan">
     <div class="p-header">
-      <div class="header-left">网盘</div>
+      <div class="header-left">
+        <img src="/src/assets/icons/logo.svg" alt="" />网盘
+      </div>
       <div class="header-content"></div>
       <div class="header-right"></div>
     </div>
@@ -146,6 +148,13 @@ const submit = async (e: any) => {
     border-color: #4096ff;
     box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
     border-inline-end-width: 1px;
+  }
+}
+.header-left {
+  font-size: 30px;
+  img {
+    width: 42px;
+    margin-right: 8px;
   }
 }
 .login-btn {
