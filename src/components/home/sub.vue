@@ -45,6 +45,12 @@ const { category } = storeToRefs(fileStore)
 const open = (type: string) => {
   category.value = type
 }
+
+const clickOpen = () => {
+  console.log('value')
+
+  isOpen.value = !isOpen.value
+}
 </script>
 
 <template>
@@ -63,7 +69,7 @@ const open = (type: string) => {
             :class="{
               'is-open': !isOpen
             }"
-            @click="isOpen = !isOpen"
+            @click="clickOpen"
           />
           我的文件
         </div>
@@ -190,5 +196,8 @@ const open = (type: string) => {
   margin-right: 3px;
   position: relative;
   top: -2px;
+}
+.is-open {
+  transform: rotateZ(270deg);
 }
 </style>
