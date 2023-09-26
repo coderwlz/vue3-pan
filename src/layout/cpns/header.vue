@@ -116,11 +116,12 @@ onUnmounted(() => {
       <div>
         <img class="avater cursor" src="/src/assets/img/avater.webp" alt="" />
       </div>
-      <div ref="myHoverableElement" class="ellipsis">
+      <div ref="myHoverableElement" class="ellipsis cursor">
         <x-ellipsis-v class="icons cursor" />
         <!-- <div class="ellipsis-body"></div> -->
         <div class="ellipsis-body" v-if="isHovered">
-          <div></div>
+          <div class="ellipsis-item">系统通知</div>
+          <div class="ellipsis-item">问题反馈</div>
         </div>
       </div>
     </div>
@@ -361,12 +362,13 @@ a {
 
 .ellipsis {
   position: relative;
-  padding: 0 5px;
+  padding: 5px;
 }
 .ellipsis-body {
   position: absolute;
   width: 130px;
-  height: 64px;
+  height: 74px;
+  padding: 5px 4px;
   background: #fff;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.16);
   top: 32px;
@@ -390,6 +392,20 @@ a {
     width: 20px;
     height: 20px;
     background: #fff;
+  }
+  .ellipsis-item {
+    height: 32px;
+    line-height: 32px;
+    position: relative;
+    z-index: 222;
+    border-radius: 8px;
+    padding-left: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #606266;
+    &:hover {
+      background: #f1f3f8;
+    }
   }
 }
 </style>
