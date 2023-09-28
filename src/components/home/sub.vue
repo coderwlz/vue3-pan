@@ -44,11 +44,12 @@ const { category } = storeToRefs(fileStore)
 
 const open = (type: string) => {
   category.value = type
+  fileStore.parent_id = ''
+  fileStore.path = []
+  fileStore.getList()
 }
 
 const clickOpen = () => {
-  console.log('value')
-
   isOpen.value = !isOpen.value
 }
 </script>

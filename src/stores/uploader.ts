@@ -12,7 +12,16 @@ import {
 export const useUploaderStore = defineStore('uploader', () => {
   const list = ref<any[]>([])
 
+  const store = useFileStore()
+
   const isFolder = ref(false) //
+
+  const join = (arr: any[]) => {
+    if (arr.length == 0) {
+      return ''
+    }
+    return JSON.stringify(arr)
+  }
 
   const open = () => {
     const input = document?.createElement('input')
@@ -38,7 +47,7 @@ export const useUploaderStore = defineStore('uploader', () => {
     input.onchange = async (event: any) => {
       const result = event.target
       for (let i = 0; i < result.files.length; i++) {
-        list.value.push(new File(result.files[i]))
+        list.value.push(new File(result.files[i], join(store.path)))
         list.value[i].start()
       }
     }
@@ -63,7 +72,8 @@ export class File {
   _lastProgressCallback = Date.now()
   currentSpeed = 0
   _prevUploadedSize = 0
-  constructor(file: any) {
+  path: string
+  constructor(file: any, path: string) {
     this.size = file.size
     this.name = file.name
     this.status = 'pending'
@@ -71,6 +81,7 @@ export class File {
     this.file = file
     this.chunkList = this.createFileChunk(file, File.SliceSize)
     this.hash = ''
+    this.path = path
   }
 
   static SliceSize = 1024 * 1024 * 10
@@ -195,7 +206,8 @@ export class File {
       await merges({
         md5: this.hash,
         fileName: this.name,
-        fileChunkNum: File.SliceSize
+        fileChunkNum: File.SliceSize,
+        path: this.path
       })
       store.getList()
       this._updateStatus(STATUS.SUCCESS)

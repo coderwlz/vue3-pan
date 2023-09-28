@@ -25,9 +25,55 @@ export async function verify(md5: string, fileName: string): Promise<any> {
   })
 }
 
-export async function getFileList(id: string): Promise<any> {
+export async function addHandleFoler(
+  name: string,
+  id: string | undefined,
+  path: string
+): Promise<any> {
+  return msiRequest.post({
+    url: '/api/add-foler',
+    data: {
+      name,
+      id,
+      path
+    }
+  })
+}
+
+export async function getFileList(
+  id?: string,
+  type?: string | undefined
+): Promise<any> {
   return msiRequest.get({
     url: '/api/filelist',
+    params: {
+      id,
+      type
+    }
+  })
+}
+
+export async function getFileInfo(id: string): Promise<any> {
+  return msiRequest.get({
+    url: '/api/file-info',
+    params: {
+      id
+    }
+  })
+}
+
+export async function delFile(id: string): Promise<any> {
+  return msiRequest.delete({
+    url: '/api/del-file',
+    params: {
+      id
+    }
+  })
+}
+
+export async function getFolerList(id?: string): Promise<any> {
+  return msiRequest.get({
+    url: '/api/folerlist',
     params: {
       id
     }

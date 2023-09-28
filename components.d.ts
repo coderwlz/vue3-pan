@@ -7,6 +7,9 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    HomeDelFile: typeof import('./src/components/home/del-file.vue')['default']
+    HomeFileAction: typeof import('./src/components/home/file-action.vue')['default']
+    HomeMainHeader: typeof import('./src/components/home/main-header.vue')['default']
     HomeNone: typeof import('./src/components/home/none.vue')['default']
     HomeSub: typeof import('./src/components/home/sub.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
