@@ -170,6 +170,12 @@ const { list, path, parent_id } = storeToRefs(fileStore)
                             >
                               复
                             </div>
+                            <div
+                              style="margin-right: 5px"
+                              @click="fileStore.openActionModel(item.id, 2)"
+                            >
+                              移
+                            </div>
                           </div>
                         </div>
                       </div>

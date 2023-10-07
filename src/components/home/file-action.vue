@@ -3,7 +3,8 @@ import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
 const fileStore = useFileStore()
 
-const { actionModel, actionTitle, actionList } = storeToRefs(fileStore)
+const { actionModel, actionTitle, actionList, action_type } =
+  storeToRefs(fileStore)
 </script>
 <template>
   <div
@@ -12,15 +13,9 @@ const { actionModel, actionTitle, actionList } = storeToRefs(fileStore)
     v-if="actionModel"
     @click="fileStore.closeActionModel"
   >
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="复制到"
-      class="u-dialog u-dialog__mini"
-      style="top: 229.5px; width: 720px"
-    >
+    <div class="u-dialog u-dialog__mini" style="top: 229.5px; width: 720px">
       <div class="u-dialog__header">
-        <div class="nd-folder-selector-dialog__title">复制到</div>
+        <div class="nd-folder-selector-dialog__title">{{ actionTitle }}</div>
         <button type="button" aria-label="Close" class="u-dialog__headerbtn">
           <i class="u-dialog__close u-icon u-icon-close"></i>
         </button>
@@ -40,7 +35,10 @@ const { actionModel, actionTitle, actionList } = storeToRefs(fileStore)
               </div>
               <div class="nd-file-selector__list">
                 <div class="nd-table">
-                  <div class="nd-table__body mouse-choose-list">
+                  <div
+                    class="nd-table__body mouse-choose-list"
+                    v-if="actionList && actionList.length > 0"
+                  >
                     <table class="nd-table__body-table mouse-choose-box">
                       <colgroup>
                         <col width="100%" />
@@ -50,6 +48,7 @@ const { actionModel, actionTitle, actionList } = storeToRefs(fileStore)
                           class="nd-table__body-row mouse-choose-item"
                           v-for="item in actionList"
                           :key="item.id"
+                          @click.stop="fileStore.getActionList(item.id)"
                         >
                           <td class="text-ellip nd-table__td">
                             <div class="nd-list-name cursor-p">
@@ -73,7 +72,10 @@ const { actionModel, actionTitle, actionList } = storeToRefs(fileStore)
                       </tbody>
                     </table>
                   </div>
-                  <div class="nd-table__body-empty" style="display: none">
+                  <div
+                    v-if="actionList && actionList.length == 0"
+                    class="nd-table__body-empty"
+                  >
                     <div class="nd-folder-selector__empty">
                       <img
                         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAMAAAAPdrEwAAAAflBMVEUAAAD/137/zF3/7sv/7sz/8Mz/78z/ylj/78z/1Xv/8Mz/8tH/8MH/1n3/133/7sv/7sz/1X7/78z/1X7/78z/1X7/13//78z/1oD/3YP/14D/8sv/1oD/887/xUn+1X3/7sv/14H+x03/z2f+1Hf+yFL+zWD+0nL+0G3+yliWAl5hAAAAHnRSTlMAbf33xUH7+5aTWiYI9vLx5N3bxK+shXxkSkA7MhWzZ/O0AAABAUlEQVRYw+3TWW6DQBBFUQJ4SOzM8/Tc6QnY/wazATdYtO5f3QUclUp6jWVZlkW16TtXavu0P1TIbr7uZjXdu6U2a+lukX44rqTdcu8cff+L0W7P0dsDRrsXjnbfHN1ztFuzyb/Lurs628fPDK0LC6fzvR6raX8q9FZNKxfox3rax4JdT6vlaA0cPXG0Ro5OHK3A0Z6jFTjaR4xW5mhFjp44WgNHJ47WyNGJoxU42nO0Mkf7iNFqOVoDR08crZGjE0crcLTnaAWO9hGjlTlakaMnjtbA0YmjNXJ04mgFjvYcrTxD+8qz422R3qmu8Fykr2vpr6Zs72p+0n42lmVZFtQ/4NqoU3Oa6doAAAAASUVORK5CYII="
@@ -98,8 +100,9 @@ const { actionModel, actionTitle, actionList } = storeToRefs(fileStore)
             ><button
               type="button"
               class="u-button nd-btn-fix-size-middle u-button--primary u-button--medium is-round"
+              @click="fileStore.actionOnOk"
             >
-              <span>复制到此</span>
+              <span>{{ action_type == 1 ? '复制' : '移动' }}到此</span>
             </button>
           </div>
         </div>
@@ -344,5 +347,32 @@ table {
   color: #fff;
   background-color: #06a7ff;
   border-color: #06a7ff;
+}
+.nd-table__body-empty {
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  overflow: auto;
+}
+.nd-folder-selector__empty {
+  padding: 90px;
+  text-align: center;
+}
+.nd-folder-selector__empty-icon {
+  width: 90px;
+  height: auto;
+}
+.nd-folder-selector__empty-text {
+  font-size: 14px;
+  color: #afb3bf;
+  line-height: 18px;
+  margin-top: 8px;
 }
 </style>

@@ -79,3 +79,23 @@ export async function getFolerList(id?: string): Promise<any> {
     }
   })
 }
+
+export async function fileCopy(id?: string, target_id?: string): Promise<any> {
+  return msiRequest.post({
+    url: '/api/copy',
+    data: {
+      id,
+      target_id
+    }
+  })
+}
+
+export async function fileMove(id?: string, target_id?: string): Promise<any> {
+  return msiRequest.post({
+    url: '/api/move',
+    data: {
+      id,
+      target_id
+    }
+  })
+}

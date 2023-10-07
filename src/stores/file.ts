@@ -5,7 +5,9 @@ import {
   addHandleFoler,
   getFileInfo,
   delFile,
-  getFolerList
+  getFolerList,
+  fileCopy,
+  fileMove
 } from '@/service/modules/file'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -96,9 +98,18 @@ export const useFileStore = defineStore('file', () => {
 
   const openFoler = (id: string, name?: string | undefined) => {
     parent_id.value = id
+    console.log('id', id)
+    console.log('name', name)
+
     if (name == undefined) {
       path.value = []
       getList()
+      router.push({
+        name: 'home',
+        query: {
+          id: parent_id.value
+        }
+      })
       return
     }
     let count = undefined
@@ -159,16 +170,20 @@ export const useFileStore = defineStore('file', () => {
   const actionTitle = ref()
   const actionList = ref()
   const actionModel = ref(false)
-  const target_id = ref('')
+  const target_id = ref()
+  const action_type = ref()
   const getActionList = async (id?: string | undefined) => {
+    target_id.value = id || '1'
     const res = await getFolerList(id || '1')
     if (res?.code === 200) {
       actionList.value = res.data
     }
   }
+
   const openActionModel = async (id: string, type: number) => {
     actionModel.value = true
     cId.value = id
+    action_type.value = type
     if (type == 1) {
       actionTitle.value = '复制到'
     } else {
@@ -181,6 +196,18 @@ export const useFileStore = defineStore('file', () => {
     actionModel.value = false
     cId.value = ''
     actionTitle.value = ''
+    action_type.value = undefined
+    target_id.value = undefined
+  }
+
+  const actionOnOk = async () => {
+    if (action_type.value == 1) {
+      await fileCopy(cId.value, target_id.value ?? (parent_id.value || '1'))
+    } else {
+      await fileMove(cId.value, target_id.value ?? (parent_id.value || '1'))
+    }
+    closeActionModel()
+    await getList()
   }
 
   return {
@@ -202,6 +229,9 @@ export const useFileStore = defineStore('file', () => {
     closeActionModel,
     actionModel,
     actionTitle,
-    actionList
+    actionList,
+    actionOnOk,
+    getActionList,
+    action_type
   }
 })

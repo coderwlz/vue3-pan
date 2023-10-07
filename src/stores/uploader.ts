@@ -207,7 +207,8 @@ export class File {
         md5: this.hash,
         fileName: this.name,
         fileChunkNum: File.SliceSize,
-        path: this.path
+        path: this.path,
+        parent_id: store.parent_id || '1'
       })
       store.getList()
       this._updateStatus(STATUS.SUCCESS)
