@@ -53,3 +53,9 @@ export function timestampToTime(timestamp: number) {
   const s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
   return Y + M + D + h + m + s
 }
+
+// 获取文件后缀
+export const getFileSuffix = (name: string) => {
+  const dot = name.lastIndexOf('.')
+  return name.substr(dot + 1)
+}

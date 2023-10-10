@@ -176,6 +176,12 @@ const { list, path, parent_id } = storeToRefs(fileStore)
                             >
                               移
                             </div>
+                            <div
+                              style="margin-right: 5px"
+                              @click="fileStore.openFileView(item)"
+                            >
+                              打
+                            </div>
                           </div>
                         </div>
                       </div>

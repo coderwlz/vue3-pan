@@ -14,6 +14,30 @@ const uploaderList = computed(() => {
   return uploaderStore.list
 })
 
+const uploadNum = computed(() => {
+  let count = 0
+  for (let i = 0; i < uploaderStore.list.length; i++) {
+    const item = uploaderStore.list[i]
+    const STATUS_MAP = ['uploading', 'merging', 'decoding', 'checksum']
+    if (STATUS_MAP.includes(item.status)) {
+      count++
+    }
+  }
+  return count
+})
+
+const uploadOverNum = computed(() => {
+  let count = 0
+  for (let i = 0; i < uploaderStore.list.length; i++) {
+    const item = uploaderStore.list[i]
+    const STATUS_MAP = ['success', 'success2']
+    if (STATUS_MAP.includes(item.status)) {
+      count++
+    }
+  }
+  return count
+})
+
 const isShowList = ref(false)
 
 // 监听点击事件
@@ -50,12 +74,16 @@ onUnmounted(() => {
         <div v-if="isShowList" class="transfer_list">
           <section class="upload-dialog-left">
             <p class="upload-dialog-left-title">传输列表</p>
-            <a class="upload-dialog-left-btn is-active cursor">文件上传（0）</a>
+            <a class="upload-dialog-left-btn is-active cursor"
+              >文件上传（{{ uploadNum }}）</a
+            >
             <a class="upload-dialog-left-btn cursor">离线下载（0）</a>
           </section>
           <section class="middle"></section>
           <section class="upload-dialog-right">
-            <div class="dialog-header">上传完成（0/0）</div>
+            <div class="dialog-header">
+              上传完成（{{ uploadOverNum }}/{{ uploaderList.length }}）
+            </div>
             <div class="dialog-body">
               <div class="uploader-list-wrapper">
                 <div class="uploader-list">
@@ -94,11 +122,19 @@ onUnmounted(() => {
                                   ><span class="cursor-p"></span></span
                               ></span>
                               <div class="file-size">
-                                {{ sizeTostr(item.size) }}
+                                {{
+                                  item.status == 'checksum'
+                                    ? '正在计算文件大小'
+                                    : sizeTostr(item.size)
+                                }}
                               </div>
-                              <span class="speed">{{
-                                `${renderSize(item.currentSpeed)}/s`
-                              }}</span>
+                              <span
+                                class="speed"
+                                v-if="item.status == 'uploading'"
+                                >{{
+                                  `${renderSize(item.currentSpeed)}/s`
+                                }}</span
+                              >
                             </div>
                           </div>
                         </div>

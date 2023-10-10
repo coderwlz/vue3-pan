@@ -142,9 +142,11 @@ export class File {
   async calculateMd5() {
     const file = this.file
     const CHUNK_SIZE = 1024 * 1024 // 1MB
+    this._updateStatus(STATUS.CHECKSUM)
     const reader = new FileReader()
     const hash = await this._getFileChunk(reader, CHUNK_SIZE, file)
-    this.progress = 0
+    // this.progress = 0
+    this._updateStatus(STATUS.UPLOADING)
     return hash
   }
 
@@ -233,10 +235,9 @@ export class File {
             return resolve('')
           })
       )
-      console.log('_getFileChunk this', this)
 
       offset += chunkSize
-      this.progress = offset / file.size
+      // this.progress = offset / file.size
       // console.log('计算中', offset / file.size)
     }
     const finalHash = hash.finalize()

@@ -99,3 +99,13 @@ export async function fileMove(id?: string, target_id?: string): Promise<any> {
     }
   })
 }
+
+export async function fileContent(id?: string): Promise<any> {
+  return msiRequest.get({
+    url: '/api/content',
+    params: {
+      id
+    },
+    responseType: 'blob'
+  })
+}

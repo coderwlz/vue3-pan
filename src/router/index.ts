@@ -5,6 +5,11 @@ const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/view',
+      name: 'view',
+      component: () => import('../views/OnlineView.vue')
+    },
+    {
       path: '/',
       name: 'homes',
       component: Layout,

@@ -7,8 +7,10 @@ import {
   delFile,
   getFolerList,
   fileCopy,
-  fileMove
+  fileMove,
+  fileContent
 } from '@/service/modules/file'
+import { getFileSuffix } from '@/utils'
 import { useRoute, useRouter } from 'vue-router'
 
 export const useFileStore = defineStore('file', () => {
@@ -210,6 +212,57 @@ export const useFileStore = defineStore('file', () => {
     await getList()
   }
 
+  const getFileContent = async (id: string) => {
+    return await fileContent(id)
+  }
+
+  const img = ['gif', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif', 'png', 'svg']
+  const txt = [
+    'txt',
+    'json',
+    'js',
+    'css',
+    'java',
+    'py',
+    'html',
+    'jsx',
+    'ts',
+    'tsx',
+    'xml',
+    'md',
+    'log'
+  ]
+  const pdf = ['pdf']
+  const xlsx = ['xls', 'xlsx', 'csv']
+  const ppt = ['pptx', 'ppt']
+  const docx = ['doc', 'docx']
+
+  const openFileView = async (data: any) => {
+    if (getFileSuffix(data.name) == 'mp4') {
+      window.open(`#/view?mode=view&filename=${data.name}&file_id=${data.id}`)
+    }
+    if (
+      img.includes(getFileSuffix(data.name)) ||
+      txt.includes(getFileSuffix(data.name)) ||
+      pdf.includes(getFileSuffix(data.name))
+    ) {
+      window.open(`#/view?mode=view&filename=${data.name}&file_id=${data.id}`)
+    }
+    if (
+      xlsx.includes(getFileSuffix(data.name)) ||
+      ppt.includes(getFileSuffix(data.name)) ||
+      docx.includes(getFileSuffix(data.name))
+    ) {
+      window.open(`#/view?mode=view&filename=${data.name}&file_id=${data.id}`)
+    }
+    if (getFileSuffix(data.name) == 'mp3') {
+      const res = await getFileContent(data.id)
+      const blob = res //处理文档流
+      const link = URL.createObjectURL(blob)
+      window.open(link)
+    }
+  }
+
   return {
     list,
     getList,
@@ -232,6 +285,8 @@ export const useFileStore = defineStore('file', () => {
     actionList,
     actionOnOk,
     getActionList,
-    action_type
+    action_type,
+    getFileContent,
+    openFileView
   }
 })

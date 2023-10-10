@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    FileVideoView: typeof import('./src/components/file/video-view.vue')['default']
     HomeDelFile: typeof import('./src/components/home/del-file.vue')['default']
     HomeFileAction: typeof import('./src/components/home/file-action.vue')['default']
     HomeMainHeader: typeof import('./src/components/home/main-header.vue')['default']
