@@ -13,7 +13,7 @@ const uploaderStore = useUploaderStore()
 
 const fileStore = useFileStore()
 fileStore.getList()
-const { list, path, parent_id } = storeToRefs(fileStore)
+const { list, path, parent_id, all } = storeToRefs(fileStore)
 </script>
 
 <template>
@@ -59,13 +59,16 @@ const { list, path, parent_id } = storeToRefs(fileStore)
                 <tr class="table-header-row">
                   <th class="table-header-select">
                     <label
+                      class="u-checkbox is-checked hide-checkbox"
+                      :class="{
+                        'is-checked': all
+                      }"
                       ><span
-                        ><span></span
-                        ><input
-                          type="checkbox"
-                          aria-hidden="false"
-                          class="u-checkbox__original"
-                          value="" /></span
+                        class="u-checkbox__input w-checkbox"
+                        :class="{
+                          'is-checked': all
+                        }"
+                        ><span class="u-checkbox__inner"></span></span
                     ></label>
                   </th>
                   <th class="table-header-th">
@@ -103,14 +106,24 @@ const { list, path, parent_id } = storeToRefs(fileStore)
                   class="table-body-row cursor"
                   v-for="item in list"
                   :key="item.id"
+                  :class="{
+                    selected: item.is_active
+                  }"
                 >
                   <td class="aichat-width">
-                    <input
-                      type="checkbox"
-                      aria-hidden="false"
-                      class="w-checkbox"
-                      value=""
-                    />
+                    <label
+                      class="u-checkbox is-checked hide-checkbox"
+                      :class="{
+                        'is-checked': item.is_active
+                      }"
+                      @click="item.is_active = !item.is_active"
+                      ><span
+                        class="u-checkbox__input w-checkbox"
+                        :class="{
+                          'is-checked': item.is_active
+                        }"
+                        ><span class="u-checkbox__inner"></span></span
+                    ></label>
                   </td>
                   <td class="pan-table_td">
                     <div>
@@ -153,34 +166,36 @@ const { list, path, parent_id } = storeToRefs(fileStore)
                         <div class="file-action">
                           <div style="display: flex">
                             <div
+                              v-if="item.is_dir == 2"
                               style="margin-right: 5px"
                               @click="fileStore.download(item.id)"
                             >
-                              下
+                              <x-download class="file-action-icon" />
                             </div>
                             <div
                               style="margin-right: 5px"
                               @click="fileStore.openDelModel(item.id)"
                             >
-                              删
+                              <x-shanchu class="file-action-icon" />
                             </div>
                             <div
                               style="margin-right: 5px"
                               @click="fileStore.openActionModel(item.id, 1)"
                             >
-                              复
+                              <x-fuzhi class="file-action-icon" />
                             </div>
                             <div
                               style="margin-right: 5px"
                               @click="fileStore.openActionModel(item.id, 2)"
                             >
-                              移
+                              <x-yidong class="file-action-icon" />
                             </div>
                             <div
+                              v-if="item.is_dir == 2"
                               style="margin-right: 5px"
                               @click="fileStore.openFileView(item)"
                             >
-                              打
+                              <x-dakai class="file-action-icon" />
                             </div>
                           </div>
                         </div>
@@ -193,7 +208,9 @@ const { list, path, parent_id } = storeToRefs(fileStore)
                     </div>
                   </td>
                   <td class="pan-table_td">
-                    <section class="">{{ sizeTostr(item.size) }}</section>
+                    <section class="">
+                      {{ item.is_dir == 1 ? '-' : sizeTostr(item.size) }}
+                    </section>
                   </td>
                 </tr>
                 <!-- <tr class="table-body-row selected cursor">
@@ -381,5 +398,68 @@ const { list, path, parent_id } = storeToRefs(fileStore)
       }
     }
   }
+}
+.file-action-icon {
+  display: inline-block;
+  width: 20px;
+  font-size: 15px;
+}
+.u-checkbox {
+  color: #03081a;
+  font-size: 14px;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.u-checkbox__input {
+  cursor: pointer;
+  outline: 0;
+  line-height: 1;
+  vertical-align: middle;
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+}
+.u-checkbox__input.is-checked .u-checkbox__inner {
+  background-color: #06a7ff;
+  border-color: #06a7ff;
+}
+.u-checkbox__inner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  z-index: 1;
+  vertical-align: top;
+  transition:
+    border-color 0.25s cubic-bezier(0.71, -0.46, 0.29, 1.46),
+    background-color 0.25s cubic-bezier(0.71, -0.46, 0.29, 1.46);
+}
+.u-checkbox__input.is-checked .u-checkbox__inner:after {
+  transform: rotate(45deg) scaleY(1);
+}
+.u-checkbox__inner:after {
+  box-sizing: content-box;
+  content: '';
+  border: 1px solid #fff;
+  border-left: 0;
+  border-top: 0;
+  height: 7px;
+  left: 5px;
+  position: absolute;
+  top: 2px;
+  transform: rotate(45deg) scaleY(0);
+  width: 3px;
+  transition: transform 0.15s ease-in 0.05s;
+  transform-origin: center;
 }
 </style>

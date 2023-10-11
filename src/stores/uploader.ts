@@ -47,8 +47,9 @@ export const useUploaderStore = defineStore('uploader', () => {
     input.onchange = async (event: any) => {
       const result = event.target
       for (let i = 0; i < result.files.length; i++) {
-        list.value.push(new File(result.files[i], join(store.path)))
-        list.value[i].start()
+        const obj = new File(result.files[i], join(store.path))
+        list.value.push(obj)
+        obj.start()
       }
     }
 
@@ -101,7 +102,9 @@ export class File {
   }
 
   async verifyFile(hash: string, name: string) {
-    const res = await verify(hash, name)
+    const store = useFileStore()
+    const parent_id = store.parent_id || '1'
+    const res = await verify(hash, name, this.path, parent_id)
     return res.data.presence
   }
 
@@ -125,6 +128,8 @@ export class File {
     if (is) {
       this._updateStatus(STATUS.SUCCESS2)
       this.progress = 1
+      const store = useFileStore()
+      store.getList()
       return
     }
 
@@ -329,7 +334,10 @@ export class File {
       return false
     }
     const store = useFileStore()
-    const flag = store.list.some(({ name }) => this.name == name)
+    const flag = store.list.some(({ name }) => {
+      console.log('this.name , name', this.name, name)
+      return this.name == name
+    })
     if (flag) {
       this._updateStatus(STATUS.ERROR)
       console.log('文件已存在')

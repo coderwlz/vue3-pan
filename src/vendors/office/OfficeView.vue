@@ -1,43 +1,31 @@
 <template>
-  <!-- <DocumentEditor
-    v-if="datas?.url"
-    id="docEditor"
-    :document-server-url="datas?.url"
-    :config="datas?.config"
-    :events_onDocumentReady="onDocumentReady"
-  >
-  </DocumentEditor> -->
+  <iframe class="view-body" :src="src"></iframe>
   <div class="text-xl pt-5 text-red-600 text-center">
     {{ errTxt }}
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-// import { getDocumentConfig } from '/src/service/docuemnt'
-// import { DocumentEditor } from '@onlyoffice/document-editor-vue'
-import { onMounted, ref } from 'vue'
+// import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { officeView, officeDel } from '@/service/modules/file'
 
-// const router = useRouter()
-// const { query, redirectedFrom } = router.currentRoute.value
-// let queryMap = new Map(Object.entries(query))
 const errTxt = ref('')
 
-const datas = ref()
-getDocumentConfig({
-  file_id: getUrlSearch('file_id'),
-  mode: getUrlSearch('mode')
-}).then(({ error, statusCode, data }) => {
-  if (error.value) {
-    errTxt.value = statusCode.value + ':' + data.value.msg
-  } else {
-    datas.value = data.value
-  }
-})
+const src = ref('')
 
-const onDocumentReady = () => {
-  console.log('Document is loaded')
+const init = async () => {
+  const res = await officeView(getUrlSearch('file_id'))
+  console.log('res', res)
+  if (res.data?.url) {
+    src.value = res.data.url
+  }
+  setTimeout(() => {
+    officeDel(getUrlSearch('file_id'))
+  }, 2000)
 }
+
+init()
 
 function getUrlSearch(name) {
   // 未传参，返回空
@@ -60,4 +48,9 @@ function getUrlSearch(name) {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.view-body {
+  width: 100%;
+  height: 100%;
+}
+</style>

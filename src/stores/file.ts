@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import {
   getFileList,
@@ -29,11 +29,20 @@ export const useFileStore = defineStore('file', () => {
     category.value = route.query?.category as string
   }
 
+  const all = computed(() => {
+    return list.value.some((item) => item.is_active)
+  })
+
   const getList = async () => {
     const type = category.value === 'all' ? undefined : category.value
     const res = await getFileList(parent_id.value || '1', type)
     if (res?.code === 200) {
-      list.value = res.data
+      list.value = res.data.map((item: any) => {
+        return {
+          ...item,
+          is_active: false
+        }
+      })
     }
   }
 
@@ -287,6 +296,7 @@ export const useFileStore = defineStore('file', () => {
     getActionList,
     action_type,
     getFileContent,
-    openFileView
+    openFileView,
+    all
   }
 })

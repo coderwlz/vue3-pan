@@ -17,11 +17,16 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     XAudio: typeof import('~icons/x/audio')['default']
     XChuanshuliebiao: typeof import('~icons/x/chuanshuliebiao')['default']
+    XDakai: typeof import('~icons/x/dakai')['default']
+    XDownload: typeof import('~icons/x/download')['default']
     XEllipsisV: typeof import('~icons/x/ellipsis-v')['default']
+    XFuzhi: typeof import('~icons/x/fuzhi')['default']
     XQita: typeof import('~icons/x/qita')['default']
+    XShanchu: typeof import('~icons/x/shanchu')['default']
     XShipin: typeof import('~icons/x/shipin')['default']
     XTupian: typeof import('~icons/x/tupian')['default']
     XWendang: typeof import('~icons/x/wendang')['default']
     XXiala: typeof import('~icons/x/xiala')['default']
+    XYidong: typeof import('~icons/x/yidong')['default']
   }
 }

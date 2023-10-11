@@ -15,12 +15,19 @@ export async function merge(data: any): Promise<any> {
   })
 }
 
-export async function verify(md5: string, fileName: string): Promise<any> {
+export async function verify(
+  md5: string,
+  fileName: string,
+  path: string,
+  parent_id: string
+): Promise<any> {
   return msiRequest.get({
     url: '/api/verify',
     params: {
       md5,
-      fileName
+      fileName,
+      path,
+      parent_id
     }
   })
 }
@@ -107,5 +114,23 @@ export async function fileContent(id?: string): Promise<any> {
       id
     },
     responseType: 'blob'
+  })
+}
+
+export async function officeView(id?: string): Promise<any> {
+  return msiRequest.get({
+    url: '/api/office',
+    params: {
+      id
+    }
+  })
+}
+
+export async function officeDel(id?: string): Promise<any> {
+  return msiRequest.get({
+    url: '/api/del-office',
+    params: {
+      id
+    }
   })
 }

@@ -1,10 +1,13 @@
 <template>
   <div :class="{ hidden }" class="edit">
-    <div class="banner">
-      <div class="containers flex justify-between items-center px-3">
-        <div class="text-gray-500 font-bold">在线预览</div>
-        <div></div>
+    <div class="p-header">
+      <div class="header-left" :title="route.query.filename">
+        <img src="/src/assets/icons/logo.svg" alt="" @click="openHome" />{{
+          route.query.filename
+        }}
       </div>
+      <div class="header-content"></div>
+      <div class="header-right"></div>
     </div>
 
     <div class="containers w-full" id="npg">
@@ -24,13 +27,19 @@
 import { getExtend, readBuffer, render } from '@/components/onlinefile/util.js'
 import { parse } from 'qs'
 import { onMounted, ref, getCurrentInstance, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 // import { api } from '@/service/service.js'
 import { useFileStore } from '@/stores/file'
 
 const fileStore = useFileStore()
 
+const router = useRouter()
 const route = useRoute()
+
+const openHome = () => {
+  router.push('/home')
+}
+
 defineProps({
   msg: {
     type: String
@@ -189,7 +198,7 @@ const displayResult = (buffer) => {
   background-color: #f2f2f2;
   border: 1px solid #ccc;
   margin: 5px;
-  height: calc(100vh - 55px);
+  height: calc(100vh - 70px);
   overflow: auto;
   & > div {
     height: 100%;
@@ -203,6 +212,33 @@ const displayResult = (buffer) => {
 
 .messages .warning {
   color: #cc6600;
+}
+
+.p-header {
+  height: 56px;
+  box-shadow: -7px 3px 10px 0 rgba(0, 0, 0, 0.06);
+  padding-left: 24px;
+  padding-right: 28px;
+  position: relative;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  font-size: 18px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 400px;
+  cursor: pointer;
+  img {
+    width: 35px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
 }
 </style>
 
