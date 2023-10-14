@@ -134,3 +134,18 @@ export async function officeDel(id?: string): Promise<any> {
     }
   })
 }
+
+export async function addLink(
+  id?: string,
+  expire_at?: number,
+  pwd?: string
+): Promise<any> {
+  return msiRequest.post({
+    url: '/api/link/add',
+    data: {
+      id,
+      expire_at,
+      pwd
+    }
+  })
+}

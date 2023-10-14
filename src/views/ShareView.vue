@@ -1,28 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useUploaderStore } from '@/stores/uploader'
-import { useFileStore } from '@/stores/file'
+import subView from '@/components/share/sub.vue'
 import { storeToRefs } from 'pinia'
 import { sizeTostr, timestampToTime } from '@/utils'
-import noneView from '@/components/home/none.vue'
-import subView from '@/components/home/sub.vue'
-import mainHeader from '@/components/home/main-header.vue'
+import noneView from '@/components/share/none.vue'
 import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
-import addLink from '@/components/home/add-link.vue'
 
-const uploaderStore = useUploaderStore()
+import { useLinkStore } from '@/stores/link'
 
-const fileStore = useFileStore()
-fileStore.getList()
-const { list, path, parent_id, all } = storeToRefs(fileStore)
+const linkStore = useLinkStore()
+linkStore.getList()
+
+const { list, all } = storeToRefs(linkStore)
 </script>
-
 <template>
   <main class="main">
     <sub-view />
     <div class="main-layout">
-      <main-header />
       <div class="pan__body">
         <div class="pan__body_file_header">
           <div class="file-header-title">
@@ -75,19 +70,19 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
                   </th>
                   <th class="table-header-th">
                     <div>
-                      <span>文件名</span>
+                      <span>分享文件</span>
                       <div><i></i><i></i></div>
                     </div>
                   </th>
                   <th class="table-header-th">
                     <div>
-                      <span>修改时间</span>
+                      <span>分享时间</span>
                       <div></div>
                     </div>
                   </th>
                   <th class="table-header-th">
                     <div>
-                      <span>大小</span>
+                      <span>状态</span>
                       <div></div>
                     </div>
                   </th>
@@ -143,65 +138,30 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
                             alt="share"
                             class="file-icon"
                           />
-                          <a
-                            class="filename text-ellip"
-                            v-if="!item.is_edit"
-                            :title="item.name"
-                            @click="fileStore.openFoler(item.id, item.name)"
-                          >
+                          <a class="filename text-ellip" :title="item.name">
                             {{ item.name }}
                           </a>
-                          <div v-else class="item-action">
-                            <div class="action-edit">
-                              <input
-                                type="text"
-                                class="u-input__inner"
-                                v-model="item.name"
-                              />
-                              <button @click="fileStore.addFolerOnOk">√</button>
-                              <button @click="fileStore.addFolerClose">
-                                ×
-                              </button>
-                            </div>
-                          </div>
                         </div>
                         <div class="file-action">
                           <div style="display: flex">
                             <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openCreateLink(item)"
-                            >
-                              <x-fenxiang class="file-action-icon" />
-                            </div>
-                            <div
                               v-if="item.is_dir == 2"
                               style="margin-right: 5px"
-                              @click="fileStore.download(item.id)"
                             >
                               <x-download class="file-action-icon" />
                             </div>
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openDelModel(item.id)"
-                            >
+                            <div style="margin-right: 5px">
                               <x-shanchu class="file-action-icon" />
                             </div>
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openActionModel(item.id, 1)"
-                            >
+                            <div style="margin-right: 5px">
                               <x-fuzhi class="file-action-icon" />
                             </div>
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openActionModel(item.id, 2)"
-                            >
+                            <div style="margin-right: 5px">
                               <x-yidong class="file-action-icon" />
                             </div>
                             <div
                               v-if="item.is_dir == 2"
                               style="margin-right: 5px"
-                              @click="fileStore.openFileView(item)"
                             >
                               <x-dakai class="file-action-icon" />
                             </div>
@@ -217,42 +177,10 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
                   </td>
                   <td class="pan-table_td">
                     <section class="">
-                      {{ item.is_dir == 1 ? '-' : sizeTostr(item.size) }}
+                      {{ item.expire_at }}
                     </section>
                   </td>
                 </tr>
-                <!-- <tr class="table-body-row selected cursor">
-                  <td class="aichat-width">
-                    <input
-                      type="checkbox"
-                      aria-hidden="false"
-                      class="w-checkbox"
-                      value=""
-                    />
-                  </td>
-                  <td class="pan-table_td">
-                    <div>
-                      <div draggable="true">
-                        <div>
-                          <img
-                            src="/src/assets/img/folder.png"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <a title="共享给我的文件夹"> 共享给我的文件夹 </a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <div class="wp-s-pan-list__time-column">
-                      <p class="">-</p>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <section class="">-</section>
-                  </td>
-                </tr> -->
               </tbody>
             </table>
           </div>
@@ -263,7 +191,6 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
   </main>
   <del-file />
   <file-action />
-  <add-link />
 </template>
 <style scoped lang="less">
 .main {
@@ -284,6 +211,7 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
       overflow: hidden;
       padding: 0 0 0 24px;
       display: flex;
+      margin-top: 20px;
       .file-header-title {
         font-size: 12px;
         color: #03081a;
@@ -297,7 +225,7 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
       }
     }
     .pan-table {
-      height: calc(100% - 40px);
+      height: 100%;
       table {
         border-collapse: collapse;
         border-spacing: 0;

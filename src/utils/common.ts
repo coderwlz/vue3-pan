@@ -59,3 +59,13 @@ export const getFileSuffix = (name: string) => {
   const dot = name.lastIndexOf('.')
   return name.substr(dot + 1)
 }
+
+export function getTimestampAfterNDays(n: number) {
+  // 获取当前时间的时间戳
+  const currentTime = new Date().getTime()
+
+  // 计算 n 天后的时间戳
+  const nDaysLater = currentTime + n * 24 * 60 * 60 * 1000
+
+  return nDaysLater
+}

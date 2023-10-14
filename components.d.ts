@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     FileVideoView: typeof import('./src/components/file/video-view.vue')['default']
+    HomeAddLink: typeof import('./src/components/home/add-link.vue')['default']
     HomeDelFile: typeof import('./src/components/home/del-file.vue')['default']
     HomeFileAction: typeof import('./src/components/home/file-action.vue')['default']
     HomeMainHeader: typeof import('./src/components/home/main-header.vue')['default']
@@ -15,11 +16,15 @@ declare module 'vue' {
     HomeSub: typeof import('./src/components/home/sub.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ShareNone: typeof import('./src/components/share/none.vue')['default']
+    ShareSub: typeof import('./src/components/share/sub.vue')['default']
     XAudio: typeof import('~icons/x/audio')['default']
     XChuanshuliebiao: typeof import('~icons/x/chuanshuliebiao')['default']
+    XClose: typeof import('~icons/x/close')['default']
     XDakai: typeof import('~icons/x/dakai')['default']
     XDownload: typeof import('~icons/x/download')['default']
     XEllipsisV: typeof import('~icons/x/ellipsis-v')['default']
+    XFenxiang: typeof import('~icons/x/fenxiang')['default']
     XFuzhi: typeof import('~icons/x/fuzhi')['default']
     XQita: typeof import('~icons/x/qita')['default']
     XShanchu: typeof import('~icons/x/shanchu')['default']

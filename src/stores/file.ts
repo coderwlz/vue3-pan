@@ -8,7 +8,8 @@ import {
   getFolerList,
   fileCopy,
   fileMove,
-  fileContent
+  fileContent,
+  addLink
 } from '@/service/modules/file'
 import { getFileSuffix } from '@/utils'
 import { useRoute, useRouter } from 'vue-router'
@@ -272,6 +273,33 @@ export const useFileStore = defineStore('file', () => {
     }
   }
 
+  // 分享
+  const linkFileInfo = ref()
+  const createLink = ref(false)
+  const isLinkOver = ref(false)
+  const link = ref()
+  const linkPwd = ref()
+  const openCreateLink = (data: any) => {
+    linkFileInfo.value = data
+    createLink.value = true
+  }
+
+  const cacelLink = () => {
+    createLink.value = false
+    linkFileInfo.value = {}
+    isLinkOver.value = false
+  }
+
+  const addLinks = async (data: any) => {
+    console.log('addLinks', data)
+
+    const res = await addLink(linkFileInfo.value.id, data.exprie_at, data.pwd)
+    linkPwd.value = res.data.pwd
+    link.value =
+      window.location.origin + '#/link/' + res.data.key + '?pwd=' + res.data.pwd
+    isLinkOver.value = true
+  }
+
   return {
     list,
     getList,
@@ -297,6 +325,14 @@ export const useFileStore = defineStore('file', () => {
     action_type,
     getFileContent,
     openFileView,
-    all
+    all,
+    addLinks,
+    cacelLink,
+    openCreateLink,
+    createLink,
+    linkFileInfo,
+    isLinkOver,
+    link,
+    linkPwd
   }
 })

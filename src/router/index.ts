@@ -10,6 +10,11 @@ const router = createRouter({
       component: () => import('../views/OnlineView.vue')
     },
     {
+      path: '/link',
+      name: 'link',
+      component: () => import('../views/LinkView.vue')
+    },
+    {
       path: '/',
       name: 'homes',
       component: Layout,
@@ -23,7 +28,7 @@ const router = createRouter({
         {
           path: '/share',
           name: 'share',
-          component: () => import('../views/AboutView.vue')
+          component: () => import('../views/ShareView.vue')
         }
       ]
     },
