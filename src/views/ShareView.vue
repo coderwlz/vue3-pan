@@ -13,34 +13,33 @@ const linkStore = useLinkStore()
 linkStore.getList()
 
 const { list, all } = storeToRefs(linkStore)
+
+const copyLinks = (data: any) => {
+  let inputs = document.createElement('input') //创建节点
+  inputs.value =
+    window.location.origin + '#/link/' + data.key + '?pwd=' + data.pwd //给节点赋值
+  document.body.appendChild(inputs) //渲染节点(要不然不起作用,可以添加隐藏属性)
+  inputs.select() //选中节点
+  let actions = document.execCommand('Copy') //指定复制命令(返回的是一个boolean类型)
+  // actions && Message({ type: 'success', message: '复制成功' })
+  inputs && inputs?.parentNode?.removeChild(inputs)
+}
 </script>
 <template>
   <main class="main">
     <sub-view />
     <div class="main-layout">
       <div class="pan__body">
+        <div class="pan__body_header">
+          <button class="upload u-button" v-if="all">
+            <X-cancel-link style="color: #fff" @click="linkStore.allClose" />
+            取消分享
+          </button>
+          <div v-else>链接分享</div>
+        </div>
         <div class="pan__body_file_header">
           <div class="file-header-title">
-            <span
-              class="cursor"
-              :class="{
-                all: parent_id != ''
-              }"
-              @click="fileStore.openFoler('')"
-            >
-              全部文件
-            </span>
-            <span
-              v-for="item in path"
-              class="cursor all"
-              :class="{
-                'item-active': parent_id == item.id
-              }"
-              :key="item.id"
-              @click="fileStore.openFoler(item.id, item.name)"
-            >
-              > {{ item.name }}</span
-            >
+            <span class="cursor"> 全部文件 </span>
           </div>
         </div>
         <div class="pan-table">
@@ -82,7 +81,7 @@ const { list, all } = storeToRefs(linkStore)
                   </th>
                   <th class="table-header-th">
                     <div>
-                      <span>状态</span>
+                      <span>过期时间</span>
                       <div></div>
                     </div>
                   </th>
@@ -144,26 +143,17 @@ const { list, all } = storeToRefs(linkStore)
                         </div>
                         <div class="file-action">
                           <div style="display: flex">
-                            <div
-                              v-if="item.is_dir == 2"
-                              style="margin-right: 5px"
-                            >
-                              <x-download class="file-action-icon" />
+                            <div style="margin-right: 5px">
+                              <x-copy-link
+                                class="file-action-icon"
+                                @click="copyLinks(item)"
+                              />
                             </div>
                             <div style="margin-right: 5px">
-                              <x-shanchu class="file-action-icon" />
-                            </div>
-                            <div style="margin-right: 5px">
-                              <x-fuzhi class="file-action-icon" />
-                            </div>
-                            <div style="margin-right: 5px">
-                              <x-yidong class="file-action-icon" />
-                            </div>
-                            <div
-                              v-if="item.is_dir == 2"
-                              style="margin-right: 5px"
-                            >
-                              <x-dakai class="file-action-icon" />
+                              <x-cancel-link
+                                class="file-action-icon"
+                                @click="linkStore(item.lid)"
+                              />
                             </div>
                           </div>
                         </div>
@@ -177,7 +167,11 @@ const { list, all } = storeToRefs(linkStore)
                   </td>
                   <td class="pan-table_td">
                     <section class="">
-                      {{ item.expire_at }}
+                      {{
+                        item.expire_at != 0
+                          ? timestampToTime(item.expire_at)
+                          : '永久有效'
+                      }}
                     </section>
                   </td>
                 </tr>
@@ -211,7 +205,7 @@ const { list, all } = storeToRefs(linkStore)
       overflow: hidden;
       padding: 0 0 0 24px;
       display: flex;
-      margin-top: 20px;
+      margin-top: 10px;
       .file-header-title {
         font-size: 12px;
         color: #03081a;
@@ -225,7 +219,7 @@ const { list, all } = storeToRefs(linkStore)
       }
     }
     .pan-table {
-      height: 100%;
+      height: calc(100% - 40px);
       table {
         border-collapse: collapse;
         border-spacing: 0;
@@ -398,5 +392,21 @@ const { list, all } = storeToRefs(linkStore)
   width: 3px;
   transition: transform 0.15s ease-in 0.05s;
   transform-origin: center;
+}
+.upload {
+  font-weight: 700;
+  padding: 8px 24px;
+  height: 32px;
+  font-size: 14px;
+  border-radius: 16px;
+  border: none;
+  color: #fff;
+  background-color: #06a7ff;
+}
+.pan__body_header {
+  margin-top: 18px;
+  padding-left: 22px;
+  height: 32px;
+  line-height: 32px;
 }
 </style>

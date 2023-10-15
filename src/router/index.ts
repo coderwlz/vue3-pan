@@ -10,7 +10,7 @@ const router = createRouter({
       component: () => import('../views/OnlineView.vue')
     },
     {
-      path: '/link',
+      path: '/link/:key',
       name: 'link',
       component: () => import('../views/LinkView.vue')
     },
