@@ -3,19 +3,23 @@ import { ref } from 'vue'
 import { useUploaderStore } from '@/stores/uploader'
 import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
-import { sizeTostr, timestampToTime } from '@/utils'
+import { sizeTostr, timestampToTime, getFileSuffix } from '@/utils'
 import noneView from '@/components/home/none.vue'
 import subView from '@/components/home/sub.vue'
 import mainHeader from '@/components/home/main-header.vue'
 import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
 import addLink from '@/components/home/add-link.vue'
-
+import { preview } from 'v-preview-image'
 const uploaderStore = useUploaderStore()
 
 const fileStore = useFileStore()
 fileStore.getList()
-const { list, path, parent_id, all } = storeToRefs(fileStore)
+const { list, path, parent_id, all, category } = storeToRefs(fileStore)
+const img_type = ['gif', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif', 'png', 'svg']
+const openImg = (current: any, list: any) => {
+  preview(current, list)
+}
 </script>
 
 <template>
@@ -23,7 +27,7 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
     <sub-view />
     <div class="main-layout">
       <main-header />
-      <div class="pan__body">
+      <div class="pan__body" v-if="category != '5'">
         <div class="pan__body_file_header">
           <div class="file-header-title">
             <span
@@ -132,7 +136,13 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
                       <div draggable="true" style="display: flex">
                         <div style="flex: 1">
                           <img
-                            v-if="item.is_dir == 2"
+                            v-if="img_type.includes(getFileSuffix(item.name))"
+                            :src="`/w/api/thumbnail?id=${item.id}`"
+                            alt="share"
+                            class="file-icon"
+                          />
+                          <img
+                            v-else-if="item.is_dir == 2"
                             src="/src/assets/img/qita.png"
                             alt="share"
                             class="file-icon"
@@ -258,6 +268,26 @@ const { list, path, parent_id, all } = storeToRefs(fileStore)
           </div>
           <none-view v-else />
         </div>
+      </div>
+      <div class="pan__body" v-else>
+        <img
+          v-for="(item, index) in list.map((item) => {
+            return {
+              src: `/w/api/thumbnail?id=${item.id}`,
+              ...item
+            }
+          })"
+          @click="
+            openImg(
+              index,
+              list.map((item) => `/w/api/content?id=${item.id}`)
+            )
+          "
+          :key="item.id"
+          :alt="item.name"
+          :src="item.src"
+          class="image"
+        />
       </div>
     </div>
   </main>
