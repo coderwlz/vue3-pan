@@ -15,10 +15,17 @@ const uploaderStore = useUploaderStore()
 
 const fileStore = useFileStore()
 fileStore.getList()
-const { list, path, parent_id, all, category } = storeToRefs(fileStore)
+const { list, path, parent_id, all, category, urlList, imgList } =
+  storeToRefs(fileStore)
 const img_type = ['gif', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif', 'png', 'svg']
 const openImg = (current: any, list: any) => {
   preview(current, list)
+}
+
+const hideMenu = (item: any) => {
+  if (!item.menuHover) {
+    item.showMenu = false
+  }
 }
 </script>
 
@@ -231,38 +238,6 @@ const openImg = (current: any, list: any) => {
                     </section>
                   </td>
                 </tr>
-                <!-- <tr class="table-body-row selected cursor">
-                  <td class="aichat-width">
-                    <input
-                      type="checkbox"
-                      aria-hidden="false"
-                      class="w-checkbox"
-                      value=""
-                    />
-                  </td>
-                  <td class="pan-table_td">
-                    <div>
-                      <div draggable="true">
-                        <div>
-                          <img
-                            src="/src/assets/img/folder.png"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <a title="共享给我的文件夹"> 共享给我的文件夹 </a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <div class="wp-s-pan-list__time-column">
-                      <p class="">-</p>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <section class="">-</section>
-                  </td>
-                </tr> -->
               </tbody>
             </table>
           </div>
@@ -270,24 +245,54 @@ const openImg = (current: any, list: any) => {
         </div>
       </div>
       <div class="pan__body" v-else>
-        <img
-          v-for="(item, index) in list.map((item) => {
-            return {
-              src: `/w/api/thumbnail?id=${item.id}`,
-              ...item
-            }
-          })"
-          @click="
-            openImg(
-              index,
-              list.map((item) => `/w/api/content?id=${item.id}`)
-            )
-          "
-          :key="item.id"
-          :alt="item.name"
-          :src="item.src"
-          class="image"
-        />
+        <div class="img_body">
+          <div
+            class="content-item"
+            v-for="(item, index) in imgList"
+            @click="openImg(index, urlList)"
+            :key="item.id"
+          >
+            <div
+              class="img-container"
+              :style="{
+                'background-image': `url(${item.src})`
+              }"
+            ></div>
+
+            <div @mouseover="item.showMenu = true" @mouseleave="hideMenu(item)">
+              <x-qita class="content-item_ation" />
+
+              <div
+                v-show="item.showMenu"
+                class="action_g"
+                @mouseover="item.menuHover = true"
+                @mouseleave="item.menuHover = false"
+              >
+                <div class="g_box_item" @click="fileStore.download(item.id)">
+                  下载
+                </div>
+                <div
+                  class="g_box_item"
+                  @click="fileStore.openActionModel(item.id, 1)"
+                >
+                  复制
+                </div>
+                <div
+                  class="g_box_item"
+                  @click="fileStore.openActionModel(item.id, 2)"
+                >
+                  移动
+                </div>
+                <div
+                  class="g_box_item"
+                  @click="fileStore.openDelModel(item.id)"
+                >
+                  删除
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -437,6 +442,14 @@ const openImg = (current: any, list: any) => {
       }
     }
   }
+  .img_body {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    padding: 20px 10px 0px;
+    overflow-y: auto;
+  }
 }
 .file-action-icon {
   display: inline-block;
@@ -500,5 +513,59 @@ const openImg = (current: any, list: any) => {
   width: 3px;
   transition: transform 0.15s ease-in 0.05s;
   transform-origin: center;
+}
+
+.content-item {
+  display: block;
+  width: 128px;
+  height: 128px;
+  line-height: 128px;
+  margin: 0 5px 5px 0;
+  outline: none;
+  text-align: center;
+  background: #f1f1f1;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  position: relative;
+  .img-container {
+    width: 100%;
+    height: 100%;
+    -webkit-transition: opacity 0.15s linear;
+    transition: opacity 0.15s linear;
+    background-position: 50%;
+    background-repeat: no-repeat;
+  }
+}
+.content-item:hover .content-item_ation {
+  display: block;
+}
+.content-item_ation {
+  display: none;
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  color: #06a7ff;
+}
+.action_g {
+  position: absolute;
+  top: 15px;
+  right: 2px;
+  width: 74px;
+  height: 140px;
+  padding: 6px 0;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+.g_box_item {
+  height: 32px;
+  padding-left: 2px;
+  line-height: 32px;
+  &:hover {
+    background: #f1f1f1;
+  }
 }
 </style>
