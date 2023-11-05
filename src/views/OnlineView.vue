@@ -25,8 +25,7 @@
 
 <script setup>
 import { getExtend, readBuffer, render } from '@/components/onlinefile/util.js'
-import { parse } from 'qs'
-import { onMounted, ref, getCurrentInstance, computed } from 'vue'
+import { onMounted, ref, getCurrentInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 // import { api } from '@/service/service.js'
 import { useFileStore } from '@/stores/file'

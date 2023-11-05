@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { getLinkInfo } from '@/service/modules/link'
 import { sizeTostr, timestampToTime } from '@/utils'
+import { getExtend, readBuffer, render } from '@/components/onlinefile/util.js'
+import { useFileStore } from '@/stores/file'
+import noneView from '@/components/home/none.vue'
+
+const fileStore = useFileStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -17,17 +22,148 @@ const pwd = ref(
 )
 
 const info = ref()
-const list = ref([])
+const list = ref<any>([])
 const init = async () => {
   const data = await getLinkInfo(key.value, pwd.value)
-  if (data.data.code === 200) {
+  console.log('data', data)
+
+  if (data.code === 200) {
     isOk.value = true
     info.value = data.data
+    console.log('info.value', info.value)
   } else {
     isOk.value = false
   }
+  if (info.value?.linkInfo?.is_dir != 1) {
+    console.log(info.value?.linkInfo)
+
+    await getContent(info.value?.linkInfo?.file_id, info.value?.linkInfo?.name)
+
+    // 判断是否是office三件套
+    if (flag.value) {
+      setOfficeView(info.value.linkInfo?.name)
+        .then(() => {
+          loading.value = false
+        })
+        .catch(() => {
+          loading.value = false
+        })
+    }
+  }
 }
 init()
+
+const output = ref()
+const last = ref<any>(null) // 上个渲染实例
+const loading = ref(false) // 加载状态跟踪
+const errTxt = ref('')
+let img = ['gif', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif', 'png', 'svg']
+let txt = [
+  'txt',
+  'json',
+  'js',
+  'css',
+  'java',
+  'py',
+  'html',
+  'jsx',
+  'ts',
+  'tsx',
+  'xml',
+  'md',
+  'log'
+]
+let pdf = ['pdf']
+let xlsx = ['xls', 'xlsx', 'csv']
+let ppt = ['pptx', 'ppt']
+let docx = ['doc', 'docx']
+let flag = ref(false)
+// 初始化获取 数据操作
+const getContent = async (id: any, filename: string) => {
+  const name = filename
+  const extend = name && getExtend(name)
+
+  if (xlsx.includes(extend) || ppt.includes(extend) || docx.includes(extend)) {
+    loading.value = true
+    flag.value = true
+  } else if (id) {
+    if (extend == 'mp4') {
+      displayResult()
+      return
+    }
+    loading.value = true
+    let data = await fileStore.getFileContent(id)
+    console.log('data', data)
+    handleChange(data)
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  // await getContent(route.query.file_id)
+  // // 判断是否是office三件套
+  // if (flag.value) {
+  //   setOfficeView()
+  //     .then(() => {
+  //       loading.value = false
+  //     })
+  //     .catch(() => {
+  //       loading.value = false
+  //     })
+  // }
+})
+
+// 挂载office渲染组件
+const setOfficeView = async (filename: string) => {
+  const name = filename
+  const extend = getExtend(name)
+  const node = document.createElement('div')
+  node.style.height = '100%'
+  // 添加孩子，防止vue实例替换dom元素
+  if (last.value) {
+    output.value.removeChild(output.value.firstElementChild)
+    last.value.$.appContext.app.unmount()
+  }
+  const child = output.value.appendChild(node)
+  return new Promise((resolve, reject) =>
+    render(undefined, extend, child).then(resolve).catch(reject)
+  )
+}
+
+const handleChange = async (e: any) => {
+  loading.value = true
+  try {
+    // const [file] = e.target.files
+    const arrayBuffer = await readBuffer(e)
+    last.value = await displayResult(arrayBuffer)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const displayResult = (buffer?: any) => {
+  // 取得文件名
+  const name = route.query.filename
+  // 取得扩展名
+  const extend = getExtend(name)
+  // 输出目的地
+  // const { output } = proxy.$refs
+  // 生成新的dom
+  const node = document.createElement('div')
+  // 添加孩子，防止vue实例替换dom元素
+  node.style.height = '100%'
+  if (last.value) {
+    output.value.removeChild(output.value.firstElementChild)
+    last.value.$.appContext.app.unmount()
+  }
+  const child = output.value.appendChild(node)
+  // 调用渲染方法进行渲染
+  return new Promise((resolve, reject) =>
+    render(buffer, extend, child).then(resolve).catch(reject)
+  )
+}
 </script>
 <template>
   <div class="link">
@@ -66,8 +202,8 @@ init()
             <span>过期时间：7天后</span>
           </div>
         </div>
-        <div class="show_body">
-          <div class="pan-table">
+        <div class="show_body" ref="output">
+          <div class="pan-table" v-if="info?.linkInfo?.is_dir == 1">
             <div class="pan-table-header">
               <table style="width: 100%">
                 <colgroup>
