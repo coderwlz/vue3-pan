@@ -1,4 +1,4 @@
-import { ref, computed, reactive } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { hasOwn } from '@vueuse/shared'
 import CryptoJS from 'crypto-js'
@@ -21,6 +21,12 @@ export const useUploaderStore = defineStore('uploader', () => {
       return ''
     }
     return JSON.stringify(arr)
+  }
+
+  const close = (index: number) => {
+    const obj = list.value[index]
+    obj.pause()
+    list.value.splice(index, 1)
   }
 
   const open = () => {
@@ -49,7 +55,7 @@ export const useUploaderStore = defineStore('uploader', () => {
       for (let i = 0; i < result.files.length; i++) {
         const obj = new File(result.files[i], join(store.path))
         list.value.push(obj)
-        obj.start()
+        list.value[list.value.length - 1].start()
       }
     }
 
@@ -57,7 +63,7 @@ export const useUploaderStore = defineStore('uploader', () => {
     input.click()
   }
 
-  return { list, open }
+  return { list, open, close }
 })
 
 export class File {
@@ -74,6 +80,7 @@ export class File {
   currentSpeed = 0
   _prevUploadedSize = 0
   path: string
+  err: string
   constructor(file: any, path: string) {
     this.size = file.size
     this.name = file.name
@@ -83,6 +90,7 @@ export class File {
     this.chunkList = this.createFileChunk(file, File.SliceSize)
     this.hash = ''
     this.path = path
+    this.err = ''
   }
 
   static SliceSize = 1024 * 1024 * 10
@@ -114,16 +122,16 @@ export class File {
       return
     }
 
-    console.log('this', this)
-
     if (!this._fileCountIntercept()) {
       // 限制同时计算hash 5个
       return
     }
 
     this.hash = await this.calculateMd5() //  计算hash
-    console.log('hash', this.hash)
 
+    if (!this.hash) {
+      return
+    }
     const is = await this.verifyFile(this.hash, this.name)
     if (is) {
       this._updateStatus(STATUS.SUCCESS2)
@@ -138,10 +146,31 @@ export class File {
     }
 
     await this.upload()
-    this._updateStatus(STATUS.MERGING)
-    await this.merge()
 
     this._fileInspect()
+  }
+
+  async pause() {
+    try {
+      this._updateStatus(STATUS.PAUSED)
+      // await this.abort()
+    } catch (e) {
+      this._updateStatus(STATUS.ERROR)
+    }
+  }
+
+  async resume() {
+    try {
+      this._updateStatus(STATUS.UPLOADING)
+      // TODO 开始重新上传
+      if (this.hash) {
+        this.upload()
+      } else {
+        this.start()
+      }
+    } catch (e) {
+      this._updateStatus(STATUS.ERROR)
+    }
   }
 
   async calculateMd5() {
@@ -150,6 +179,9 @@ export class File {
     this._updateStatus(STATUS.CHECKSUM)
     const reader = new FileReader()
     const hash = await this._getFileChunk(reader, CHUNK_SIZE, file)
+    if (this.status == STATUS.PAUSED) {
+      return
+    }
     // this.progress = 0
     this._updateStatus(STATUS.UPLOADING)
     return hash
@@ -178,33 +210,38 @@ export class File {
     this._prevUploadedSize = uploaded
   }
 
-  async upload() {
-    // const arr = []
-    console.log('chunkList', this.chunkList)
-    let count = 0
-    for (let i = 0; i < this.chunkList.length; i++) {
-      const formData = new FormData()
-      formData.append('file', this.chunkList[i].file)
-      formData.append('md5', this.hash)
-      formData.append('fileName', this.name)
-      formData.append('index', i + '')
-      console.log('chunkList' + i)
-      let loaded = 0
-      // arr.push(
-      await uploads(formData, (progressEvent: any) => {
-        if (i == count) {
-          loaded = progressEvent.loaded
-        }
-      })
-      this.onProcess(loaded)
-      count++
-
-      console.log('count', count)
-
-      // )
+  async upload(): Promise<any> {
+    if (this.status == STATUS.PAUSED) {
+      return
     }
-    // await Promise.all(arr)
-    return
+    const chunk = this.chunkList[this.chunkIndex]
+    const formData = new FormData()
+    formData.append('file', chunk.file)
+    formData.append('md5', this.hash)
+    formData.append('fileName', this.name)
+    formData.append('index', this.chunkIndex + '')
+
+    let loaded = 0
+    // arr.push(
+    await uploads(formData, (progressEvent: any) => {
+      // if (this.chunkIndex == count) {
+      loaded = progressEvent.loaded
+      // }
+    })
+    this.onProcess(loaded)
+    // count++
+    if (this.status == STATUS.PAUSED) {
+      return
+    }
+    this.chunkIndex++
+    if (this.chunkIndex == this.chunkList.length) {
+      this._updateStatus(STATUS.MERGING)
+      await this.merge()
+      return
+    }
+    // )
+    // }
+    return this.upload()
   }
 
   async merge() {
@@ -263,7 +300,7 @@ export class File {
   }
 
   _fileCountIntercept() {
-    const store = useFileStore()
+    const store = useUploaderStore()
     let count = 0
     for (let i = 0; i < store.list.length; i++) {
       const item = store.list[i]
@@ -280,7 +317,7 @@ export class File {
   }
 
   _fileCountInspect() {
-    const store = useFileStore()
+    const store = useUploaderStore()
     for (let i = 0; i < store.list.length; i++) {
       const item = store.list[i]
       const STATUS_MAP = ['checksum2']
@@ -293,7 +330,7 @@ export class File {
   }
 
   _fileIntercept() {
-    const store = useFileStore()
+    const store = useUploaderStore()
     let count = 0
     for (let i = 0; i < store.list.length; i++) {
       const item = store.list[i]
@@ -317,7 +354,7 @@ export class File {
   }
 
   _fileInspect() {
-    const store = useFileStore()
+    const store = useUploaderStore()
     for (let i = 0; i < store.list.length; i++) {
       const item = store.list[i]
       const STATUS_MAP = ['paused']
@@ -340,6 +377,7 @@ export class File {
     })
     if (flag) {
       this._updateStatus(STATUS.ERROR)
+      this.err = '文件已存在'
       console.log('文件已存在')
     }
     return flag

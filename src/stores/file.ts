@@ -34,6 +34,10 @@ export const useFileStore = defineStore('file', () => {
     return list.value.some((item) => item.is_active)
   })
 
+  const urlList = ref()
+
+  const imgList = ref()
+
   const getList = async () => {
     const type = category.value === 'all' ? undefined : category.value
     const res = await getFileList(parent_id.value || '1', type)
@@ -44,6 +48,19 @@ export const useFileStore = defineStore('file', () => {
           is_active: false
         }
       })
+      if (category.value == '5') {
+        urlList.value = res.data.map(
+          (item: any) => `/w/api/content?id=${item.id}`
+        )
+        imgList.value = res.data.map((item: any) => {
+          return {
+            src: `/w/api/thumbnail?id=${item.id}`,
+            ...item,
+            showMenu: false,
+            menuHover: false
+          }
+        })
+      }
     }
   }
 
@@ -333,6 +350,8 @@ export const useFileStore = defineStore('file', () => {
     linkFileInfo,
     isLinkOver,
     link,
-    linkPwd
+    linkPwd,
+    urlList,
+    imgList
   }
 })
