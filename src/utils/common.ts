@@ -69,3 +69,13 @@ export function getTimestampAfterNDays(n: number) {
 
   return nDaysLater
 }
+
+export const copyVal = (str: string) => {
+  const inputs = document.createElement('input') //创建节点
+  inputs.value = str //给节点赋值
+  document.body.appendChild(inputs) //渲染节点(要不然不起作用,可以添加隐藏属性)
+  inputs.select() //选中节点
+  const actions = document.execCommand('Copy') //指定复制命令(返回的是一个boolean类型)
+  inputs && inputs?.parentNode?.removeChild(inputs)
+  return !!actions
+}

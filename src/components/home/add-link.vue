@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { getTimestampAfterNDays } from '@/utils'
+import { getTimestampAfterNDays, copyVal } from '@/utils'
 import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
+import useCurrentInstance from '@/hooks/useCurrentInstance'
+
+const { $message } = useCurrentInstance()
 
 const fileStore = useFileStore()
 
@@ -34,14 +37,15 @@ watch(link_pwd_type, (value: any) => {
   }
 })
 
-const copyLinks = () => {
-  let inputs = document.createElement('input') //创建节点
-  inputs.value = link.value //给节点赋值
-  document.body.appendChild(inputs) //渲染节点(要不然不起作用,可以添加隐藏属性)
-  inputs.select() //选中节点
-  let actions = document.execCommand('Copy') //指定复制命令(返回的是一个boolean类型)
-  // actions && Message({ type: 'success', message: '复制成功' })
-  inputs && inputs?.parentNode?.removeChild(inputs)
+const copyLinks = (val: string) => {
+  // let inputs = document.createElement('input') //创建节点
+  // inputs.value = link.value //给节点赋值
+  // document.body.appendChild(inputs) //渲染节点(要不然不起作用,可以添加隐藏属性)
+  // inputs.select() //选中节点
+  // let actions = document.execCommand('Copy') //指定复制命令(返回的是一个boolean类型)
+  // // actions && Message({ type: 'success', message: '复制成功' })
+  // inputs && inputs?.parentNode?.removeChild(inputs)
+  copyVal(val) && $message.success('复制成功')
 }
 </script>
 
@@ -198,7 +202,7 @@ const copyLinks = () => {
             >后失效
           </div>
           <div class="link-submit">
-            <button class="upload u-button" @click="copyLinks">
+            <button class="upload u-button" @click="copyLinks(link)">
               复制链接及提取码
             </button>
           </div>

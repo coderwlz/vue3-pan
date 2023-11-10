@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useUploaderStore } from '@/stores/uploader'
 import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
 import { sizeTostr, timestampToTime, getFileSuffix } from '@/utils'
@@ -11,7 +9,9 @@ import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
 import addLink from '@/components/home/add-link.vue'
 import { preview } from 'v-preview-image'
-const uploaderStore = useUploaderStore()
+import { Dropdown, Menu } from 'ant-design-vue'
+
+const MenuItem = Menu.Item
 
 const fileStore = useFileStore()
 fileStore.getList()
@@ -115,129 +115,142 @@ const hideMenu = (item: any) => {
                 <col width="22%" />
               </colgroup>
               <tbody>
-                <tr
-                  class="table-body-row cursor"
+                <Dropdown
                   v-for="item in list"
                   :key="item.id"
-                  :class="{
-                    selected: item.is_active
-                  }"
+                  :trigger="['contextmenu']"
                 >
-                  <td class="aichat-width">
-                    <label
-                      class="u-checkbox is-checked hide-checkbox"
-                      :class="{
-                        'is-checked': item.is_active
-                      }"
-                      @click="item.is_active = !item.is_active"
-                      ><span
-                        class="u-checkbox__input w-checkbox"
+                  <tr
+                    class="table-body-row cursor"
+                    :class="{
+                      selected: item.is_active
+                    }"
+                  >
+                    <td class="aichat-width">
+                      <label
+                        class="u-checkbox is-checked hide-checkbox"
                         :class="{
                           'is-checked': item.is_active
                         }"
-                        ><span class="u-checkbox__inner"></span></span
-                    ></label>
-                  </td>
-                  <td class="pan-table_td">
-                    <div>
-                      <div draggable="true" style="display: flex">
-                        <div style="flex: 1">
-                          <img
-                            v-if="img_type.includes(getFileSuffix(item.name))"
-                            :src="`/w/api/thumbnail?id=${item.id}`"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <img
-                            v-else-if="item.is_dir == 2"
-                            src="/src/assets/img/qita.png"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <img
-                            v-else
-                            src="/src/assets/img/folder.png"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <a
-                            class="filename text-ellip"
-                            v-if="!item.is_edit"
-                            :title="item.name"
-                            @click="fileStore.openFoler(item.id, item.name)"
-                          >
-                            {{ item.name }}
-                          </a>
-                          <div v-else class="item-action">
-                            <div class="action-edit">
-                              <input
-                                type="text"
-                                class="u-input__inner"
-                                v-model="item.name"
-                              />
-                              <button @click="fileStore.addFolerOnOk">√</button>
-                              <button @click="fileStore.addFolerClose">
-                                ×
-                              </button>
+                        @click="item.is_active = !item.is_active"
+                        ><span
+                          class="u-checkbox__input w-checkbox"
+                          :class="{
+                            'is-checked': item.is_active
+                          }"
+                          ><span class="u-checkbox__inner"></span></span
+                      ></label>
+                    </td>
+                    <td class="pan-table_td">
+                      <div>
+                        <div draggable="true" style="display: flex">
+                          <div style="flex: 1">
+                            <img
+                              v-if="img_type.includes(getFileSuffix(item.name))"
+                              :src="`/w/api/thumbnail?id=${item.id}`"
+                              alt="share"
+                              class="file-icon"
+                            />
+                            <img
+                              v-else-if="item.is_dir == 2"
+                              src="/src/assets/img/qita.png"
+                              alt="share"
+                              class="file-icon"
+                            />
+                            <img
+                              v-else
+                              src="/src/assets/img/folder.png"
+                              alt="share"
+                              class="file-icon"
+                            />
+                            <a
+                              class="filename text-ellip"
+                              v-if="!item.is_edit"
+                              :title="item.name"
+                              @click="fileStore.openFoler(item.id, item.name)"
+                            >
+                              {{ item.name }}
+                            </a>
+                            <div v-else class="item-action">
+                              <div class="action-edit">
+                                <input
+                                  type="text"
+                                  class="u-input__inner"
+                                  v-model="item.name"
+                                />
+                                <button @click="fileStore.addFolerOnOk">
+                                  √
+                                </button>
+                                <button @click="fileStore.addFolerClose">
+                                  ×
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div class="file-action">
-                          <div style="display: flex">
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openCreateLink(item)"
-                            >
-                              <x-fenxiang class="file-action-icon" />
-                            </div>
-                            <div
-                              v-if="item.is_dir == 2"
-                              style="margin-right: 5px"
-                              @click="fileStore.download(item.id)"
-                            >
-                              <x-download class="file-action-icon" />
-                            </div>
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openDelModel(item.id)"
-                            >
-                              <x-shanchu class="file-action-icon" />
-                            </div>
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openActionModel(item.id, 1)"
-                            >
-                              <x-fuzhi class="file-action-icon" />
-                            </div>
-                            <div
-                              style="margin-right: 5px"
-                              @click="fileStore.openActionModel(item.id, 2)"
-                            >
-                              <x-yidong class="file-action-icon" />
-                            </div>
-                            <div
-                              v-if="item.is_dir == 2"
-                              style="margin-right: 5px"
-                              @click="fileStore.openFileView(item)"
-                            >
-                              <x-dakai class="file-action-icon" />
+                          <div class="file-action">
+                            <div style="display: flex">
+                              <div
+                                style="margin-right: 5px"
+                                @click="fileStore.openCreateLink(item)"
+                              >
+                                <x-fenxiang class="file-action-icon" />
+                              </div>
+                              <div
+                                v-if="item.is_dir == 2"
+                                style="margin-right: 5px"
+                                @click="fileStore.download(item.id)"
+                              >
+                                <x-download class="file-action-icon" />
+                              </div>
+                              <div
+                                style="margin-right: 5px"
+                                @click="fileStore.openDelModel(item.id)"
+                              >
+                                <x-shanchu class="file-action-icon" />
+                              </div>
+                              <div
+                                style="margin-right: 5px"
+                                @click="fileStore.openActionModel(item.id, 1)"
+                              >
+                                <x-fuzhi class="file-action-icon" />
+                              </div>
+                              <div
+                                style="margin-right: 5px"
+                                @click="fileStore.openActionModel(item.id, 2)"
+                              >
+                                <x-yidong class="file-action-icon" />
+                              </div>
+                              <div
+                                v-if="item.is_dir == 2"
+                                style="margin-right: 5px"
+                                @click="fileStore.openFileView(item)"
+                              >
+                                <x-dakai class="file-action-icon" />
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <div class="wp-s-pan-list__time-column">
-                      <p class="">{{ timestampToTime(item.create_at) }}</p>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <section class="">
-                      {{ item.is_dir == 1 ? '-' : sizeTostr(item.size) }}
-                    </section>
-                  </td>
-                </tr>
+                    </td>
+                    <td class="pan-table_td">
+                      <div class="wp-s-pan-list__time-column">
+                        <p class="">{{ timestampToTime(item.create_at) }}</p>
+                      </div>
+                    </td>
+                    <td class="pan-table_td">
+                      <section class="">
+                        {{ item.is_dir == 1 ? '-' : sizeTostr(item.size) }}
+                      </section>
+                    </td>
+                  </tr>
+                  <template #overlay>
+                    <Menu>
+                      <menu-item key="1">打开</menu-item>
+                      <menu-item key="2">移动</menu-item>
+                      <menu-item key="3">3rd menu item</menu-item>
+                    </Menu>
+                  </template>
+                </Dropdown>
               </tbody>
             </table>
           </div>

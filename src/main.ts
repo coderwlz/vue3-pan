@@ -10,6 +10,8 @@ import VueCodeMirror from 'vue-codemirror'
 import VueViewer from 'v-viewer'
 import 'viewerjs/dist/viewer.css'
 import vPreviewImage from 'v-preview-image'
+import { message } from 'ant-design-vue'
+
 const app = createApp(App)
 
 app.use(vPreviewImage)
@@ -18,3 +20,5 @@ app.use(router)
 app.use(VueCodeMirror)
 app.use(VueViewer as any)
 app.mount('#app')
+
+app.config.globalProperties.$message = message
