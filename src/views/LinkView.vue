@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import { getLinkInfo } from '@/service/modules/link'
+import { getLinkInfo, closeShareLink } from '@/service/modules/link'
 import { sizeTostr, timestampToTime } from '@/utils'
 import { getExtend, readBuffer, render } from '@/components/onlinefile/util.js'
 import { useFileStore } from '@/stores/file'
 import noneView from '@/components/home/none.vue'
+import useCurrentInstance from '@/hooks/useCurrentInstance'
+import fileAction from '@/components/link/file-action.vue'
+import { useFileList } from '@/hooks/useFileList'
 
+const { $message } = useCurrentInstance()
 const fileStore = useFileStore()
 
 const router = useRouter()
@@ -23,19 +27,21 @@ const pwd = ref(
 
 const info = ref()
 const list = ref<any>([])
+const bodyInfo = ref()
 const init = async () => {
-  const data = await getLinkInfo(key.value, pwd.value)
+  const data = await getLinkInfo(key.value as string, pwd.value as string)
   console.log('data', data)
 
   if (data.code === 200) {
     isOk.value = true
     info.value = data.data
     console.log('info.value', info.value)
+    cId.value = info.value?.linkInfo?.file_id
   } else {
     isOk.value = false
   }
-  if (info.value?.linkInfo?.is_dir != 1) {
-    console.log(info.value?.linkInfo)
+  if (info.value?.file?.is_dir != 1) {
+    console.log('info.value?.linkInfo', info.value?.linkInfo)
 
     await getContent(info.value?.linkInfo?.file_id, info.value?.linkInfo?.name)
 
@@ -49,6 +55,10 @@ const init = async () => {
           loading.value = false
         })
     }
+  } else {
+    bodyInfo.value = useFileList({
+      item: info.value.file
+    })
   }
 }
 init()
@@ -116,7 +126,7 @@ onMounted(async () => {
 // 挂载office渲染组件
 const setOfficeView = async (filename: string) => {
   const name = filename
-  const extend = getExtend(name)
+  const extend = name && getExtend(name)
   const node = document.createElement('div')
   node.style.height = '100%'
   // 添加孩子，防止vue实例替换dom元素
@@ -145,7 +155,7 @@ const handleChange = async (e: any) => {
 
 const displayResult = (buffer?: any) => {
   // 取得文件名
-  const name = route.query.filename
+  const name = info.value.linkInfo?.name
   // 取得扩展名
   const extend = getExtend(name)
   // 输出目的地
@@ -163,6 +173,40 @@ const displayResult = (buffer?: any) => {
   return new Promise((resolve, reject) =>
     render(buffer, extend, child).then(resolve).catch(reject)
   )
+}
+
+// 取消分享
+const cancelLink = async () => {
+  try {
+    await closeShareLink(info.value?.linkInfo.id)
+    $message.success('取消成功')
+    openHome()
+  } catch (e) {
+    $message.error('取消失败')
+  }
+}
+
+const download = async () => {
+  const id = info.value?.linkInfo.file_id
+  const url =
+    window.location.origin +
+    `/w/api/download?id=${id}&timeout=${new Date().getTime()}`
+  window.open(url)
+}
+
+const showModel = ref(false)
+const cId = ref()
+const mClose = () => {
+  showModel.value = false
+}
+const open = () => {
+  showModel.value = true
+}
+
+const getRoot = () => {
+  bodyInfo.value = useFileList({
+    item: info.value.file
+  })
 }
 </script>
 <template>
@@ -189,12 +233,14 @@ const displayResult = (buffer?: any) => {
                 alt="share"
                 class="file-icon"
               />
-              高薪webGL工程师
+              {{ info.file.name }}
             </div>
             <div class="link_file_action">
-              <span class="g-button"><x-cancel-link /> 取消分享</span>
-              <span class="g-button"><x-down /> 下载</span>
-              <span class="g-button">保存到我的网盘</span>
+              <span class="g-button" @click="cancelLink"
+                ><x-cancel-link /> 取消分享</span
+              >
+              <span class="g-button" @click="download"><x-down /> 下载</span>
+              <span class="g-button" @click="open">保存到我的网盘</span>
             </div>
           </div>
           <div class="slide-show-other-infos">
@@ -203,7 +249,18 @@ const displayResult = (buffer?: any) => {
           </div>
         </div>
         <div class="show_body" ref="output">
-          <div class="pan-table" v-if="info?.linkInfo?.is_dir == 1">
+          <div class="show_body_header">
+            <span style="cursor: pointer" @click="getRoot">全部文件</span>
+            <span
+              v-for="item in bodyInfo?.levelList"
+              :key="item.id"
+              @click="bodyInfo.openFoler(item.id, item.name)"
+              class="show_body_header_item"
+              ><div class="show_body_header_item-l">></div>
+              {{ item.name }}</span
+            >
+          </div>
+          <div class="pan-table" v-if="info?.file?.is_dir == 1">
             <div class="pan-table-header">
               <table style="width: 100%">
                 <colgroup>
@@ -214,7 +271,7 @@ const displayResult = (buffer?: any) => {
                 <thead>
                   <tr class="table-header-row">
                     <th class="table-header-th">
-                      <div>
+                      <div style="margin-left: 10px">
                         <span>文件名</span>
                         <div><i></i><i></i></div>
                       </div>
@@ -235,7 +292,7 @@ const displayResult = (buffer?: any) => {
                 </thead>
               </table>
             </div>
-            <div class="pan-table-body" v-if="list.length">
+            <div class="pan-table-body" v-if="bodyInfo.list.length">
               <table style="width: 100%">
                 <colgroup>
                   <col width="45%" />
@@ -245,14 +302,11 @@ const displayResult = (buffer?: any) => {
                 <tbody>
                   <tr
                     class="table-body-row cursor"
-                    v-for="item in list"
+                    v-for="item in bodyInfo.list"
                     :key="item.id"
-                    :class="{
-                      selected: item.is_active
-                    }"
                   >
                     <td class="pan-table_td">
-                      <div>
+                      <div style="margin-left: 10px">
                         <div draggable="true" style="display: flex">
                           <div style="flex: 1">
                             <img
@@ -267,12 +321,16 @@ const displayResult = (buffer?: any) => {
                               alt="share"
                               class="file-icon"
                             />
-                            <a class="filename text-ellip" :title="item.name">
+                            <a
+                              class="filename text-ellip"
+                              :title="item.name"
+                              @click="bodyInfo.openFoler(item.id, item.name)"
+                            >
                               {{ item.name }}
                             </a>
                           </div>
                           <div class="file-action">
-                            <div style="display: flex">
+                            <div v-if="item.is_dir == 2" style="display: flex">
                               <div style="margin-right: 5px">
                                 <x-download class="file-action-icon" />
                               </div>
@@ -302,6 +360,12 @@ const displayResult = (buffer?: any) => {
       <div class="bd_right"></div>
     </div>
   </div>
+  <file-action
+    v-if="showModel"
+    :cId="cId"
+    :showModel="showModel"
+    @close="mClose"
+  />
 </template>
 <style scoped lang="less">
 .link {
@@ -418,5 +482,138 @@ const displayResult = (buffer?: any) => {
   span {
     margin-left: 8px;
   }
+}
+
+.pan-table {
+  height: calc(100% - 40px);
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+  .pan-table-header {
+    .table-header-row {
+      height: 50px;
+      line-height: 50px;
+      color: #818999;
+      text-align: left;
+      font-size: 12px;
+      .table-header-select {
+        padding-left: 0;
+        width: 80px;
+        text-align: center;
+      }
+      .table-header-th {
+        line-height: 1;
+        cursor: pointer;
+        border-bottom: 1px solid #f7f8fa;
+      }
+    }
+  }
+  .pan-table-body {
+    height: calc(100% - 58px);
+    position: relative;
+    overflow: auto;
+    user-select: none;
+    .table-body-row {
+      height: 50px;
+      line-height: 50px;
+      color: #03081a;
+      font-size: 12px;
+      .aichat-width {
+        padding-left: 0;
+        width: 80px;
+        text-align: center;
+      }
+      &:hover {
+        background-color: #f7f9fc;
+        border-color: #f7f9fc;
+      }
+      &:hover .w-checkbox {
+        visibility: visible;
+      }
+      .w-checkbox {
+        visibility: hidden;
+      }
+      &.selected .w-checkbox {
+        visibility: visible;
+      }
+      &.selected {
+        background: #f2faff;
+      }
+      .item-action {
+        display: inline-block;
+        height: 24px;
+        .action-edit {
+          display: flex;
+          height: 24px;
+
+          input {
+            display: inline-block;
+            height: 24px;
+            line-height: 24px;
+            outline: 0;
+            border-color: #06a7ff;
+          }
+          button {
+            background-color: #06a7ff;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            color: #fff;
+            outline: 0;
+            border: none;
+            margin-left: 8px;
+            cursor: pointer;
+          }
+        }
+      }
+
+      .filename {
+        width: 84%;
+        display: inline-block;
+        &:hover {
+          color: #06a7ff;
+        }
+      }
+      &:hover .file-action {
+        display: block;
+      }
+      .file-action {
+        display: none;
+      }
+    }
+    .file-icon {
+      width: 32px;
+      height: 32px;
+    }
+    .pan-table_td {
+      border-bottom: 1px solid #f7f8fa;
+      position: relative;
+    }
+  }
+}
+.wp-s-file-contain-list__empty {
+  height: calc(100% - 51px);
+}
+.show_body_header {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 10px;
+  background-color: #fafafc;
+  color: #afb3bf;
+}
+.show_body_header_item {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 12px;
+}
+.show_body_header_item:last-child {
+  color: #06a7ff;
+}
+.show_body_header_item-l {
+  display: inline-block;
+  margin-left: 5px;
 }
 </style>

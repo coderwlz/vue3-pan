@@ -25,7 +25,9 @@ export default defineConfig({
       autoInstall: true,
       defaultClass: 'material-icons',
       customCollections: {
-        x: new FileSystemIconLoader(path.join(__dirname, './src/assets/icons'))
+        x: FileSystemIconLoader(
+          path.join(__dirname, './src/assets/icons')
+        ) as any
       },
       iconCustomizer: function (collection, icon, props) {
         if (collection === 'x') {
@@ -47,6 +49,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/w': {
+        // target: 'http://59.110.7.8:3000',
         target: 'http://localhost:3000',
         rewrite: (path) => path.replace(/^\/w/, '')
       }

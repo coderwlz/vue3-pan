@@ -4,15 +4,17 @@
     {
       "path": "./tsconfig.node.json"
     },
-    {
-      "path": "./tsconfig.app.json"
-    }
+    // {
+    //   "path": "./tsconfig.app.json"
+    // }
   ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
+      "@": ["src"],
       "@/*": ["src/*"]
     },
+    "allowJs": true,
     "moduleResolution": "Node",
     "types": [
       "node"
@@ -24,8 +26,9 @@
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "*.ts"],
 }

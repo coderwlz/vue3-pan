@@ -152,7 +152,7 @@ const copyLinks = (data: any) => {
                             <div style="margin-right: 5px">
                               <x-cancel-link
                                 class="file-action-icon"
-                                @click="linkStore(item.lid)"
+                                @click="linkStore.closeLink(item.lid)"
                               />
                             </div>
                           </div>

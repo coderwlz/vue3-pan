@@ -1,5 +1,5 @@
 <template>
-  <viewer :images="images">
+  <viewer style="height: 100%" :images="images">
     <img
       v-for="item in images"
       :key="item.index"
