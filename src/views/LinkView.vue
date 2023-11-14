@@ -136,7 +136,9 @@ const setOfficeView = async (filename: string) => {
   }
   const child = output.value.appendChild(node)
   return new Promise((resolve, reject) =>
-    render(undefined, extend, child).then(resolve).catch(reject)
+    render(undefined, extend, child, info.value?.linkInfo?.file_id)
+      .then(resolve)
+      .catch(reject)
   )
 }
 
@@ -171,7 +173,9 @@ const displayResult = (buffer?: any) => {
   const child = output.value.appendChild(node)
   // 调用渲染方法进行渲染
   return new Promise((resolve, reject) =>
-    render(buffer, extend, child).then(resolve).catch(reject)
+    render(buffer, extend, child, info.value?.linkInfo?.file_id)
+      .then(resolve)
+      .catch(reject)
   )
 }
 
@@ -233,7 +237,7 @@ const getRoot = () => {
                 alt="share"
                 class="file-icon"
               />
-              {{ info.file.name }}
+              {{ info?.file?.name }}
             </div>
             <div class="link_file_action">
               <span class="g-button" @click="cancelLink"
@@ -249,7 +253,7 @@ const getRoot = () => {
           </div>
         </div>
         <div class="show_body" ref="output">
-          <div class="show_body_header">
+          <div class="show_body_header" v-if="info?.file?.is_dir == 1">
             <span style="cursor: pointer" @click="getRoot">全部文件</span>
             <span
               v-for="item in bodyInfo?.levelList"

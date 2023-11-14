@@ -7,21 +7,30 @@
 
 <script setup>
 // import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 import { officeView, officeDel } from '@/service/modules/file'
+
+const props = defineProps({
+  file_id: {
+    type: String,
+    default: ''
+  }
+})
+const { file_id } = toRefs(props)
+console.log(file_id, 'file_id')
 
 const errTxt = ref('')
 
 const src = ref('')
 
 const init = async () => {
-  const res = await officeView(getUrlSearch('file_id'))
+  const res = await officeView(file_id.value)
   console.log('res', res)
   if (res.data?.url) {
     src.value = res.data.url
   }
   setTimeout(() => {
-    officeDel(getUrlSearch('file_id'))
+    officeDel(file_id.value)
   }, 2000)
 }
 

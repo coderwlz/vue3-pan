@@ -122,7 +122,9 @@ const setOfficeView = async () => {
   }
   const child = output.value.appendChild(node)
   return new Promise((resolve, reject) =>
-    render(undefined, extend, child).then(resolve).catch(reject)
+    render(undefined, extend, child, route.query.file_id)
+      .then(resolve)
+      .catch(reject)
   )
 }
 
@@ -157,7 +159,9 @@ const displayResult = (buffer) => {
   const child = output.value.appendChild(node)
   // 调用渲染方法进行渲染
   return new Promise((resolve, reject) =>
-    render(buffer, extend, child).then(resolve).catch(reject)
+    render(buffer, extend, child, route.query.file_id)
+      .then(resolve)
+      .catch(reject)
   )
 }
 </script>

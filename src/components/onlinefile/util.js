@@ -32,10 +32,10 @@ export function getExtend(name) {
   return name.substr(dot + 1)
 }
 
-export async function render(buffer, type, target) {
+export async function render(buffer, type, target, file_id) {
   const handler = renders[type]
   if (handler) {
-    return handler(buffer, target)
+    return handler(buffer, target, file_id)
   }
   return renders.error(buffer, target, type)
 }

@@ -143,8 +143,13 @@ const hideMenu = (item: any) => {
                     </td>
                     <td class="pan-table_td">
                       <div>
-                        <div draggable="true" style="display: flex">
-                          <div style="flex: 1">
+                        <div draggable="true" style="overflow: hidden">
+                          <div
+                            style="
+                              width: calc(100% - 150px);
+                              display: inline-block;
+                            "
+                          >
                             <img
                               v-if="img_type.includes(getFileSuffix(item.name))"
                               :src="`/w/api/thumbnail?id=${item.id}`"
@@ -163,6 +168,7 @@ const hideMenu = (item: any) => {
                               alt="share"
                               class="file-icon"
                             />
+
                             <a
                               class="filename text-ellip"
                               v-if="!item.is_edit"
@@ -431,7 +437,7 @@ const hideMenu = (item: any) => {
           }
 
           .filename {
-            width: 84%;
+            width: calc(100% - 32px);
             display: inline-block;
             &:hover {
               color: #06a7ff;
@@ -442,6 +448,9 @@ const hideMenu = (item: any) => {
           }
           .file-action {
             display: none;
+            position: absolute;
+            right: 0px;
+            top: 0px;
           }
         }
         .file-icon {

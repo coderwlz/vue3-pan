@@ -19,8 +19,8 @@ const handlers = [
   // 办公三件套
   {
     accepts: ['xls', 'xlsx', 'csv', 'pptx', 'ppt', 'doc', 'docx'],
-    handler: async (buffer, target) => {
-      return renderOffice(buffer, target)
+    handler: async (buffer, target, file_id) => {
+      return renderOffice(buffer, target, file_id)
     }
   },
   // 图片过滤器
@@ -40,8 +40,8 @@ const handlers = [
   // 使用mp4
   {
     accepts: ['mp4'],
-    handler: async (buffer, target) => {
-      return renderMp4(buffer, target)
+    handler: async (buffer, target, file_id) => {
+      return renderMp4(buffer, target, file_id)
     }
   },
   // 纯文本预览
