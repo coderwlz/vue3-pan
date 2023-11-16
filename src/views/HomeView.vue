@@ -76,6 +76,7 @@ const hideMenu = (item: any) => {
                       :class="{
                         'is-checked': all
                       }"
+                      @click="fileStore.setAll"
                       ><span
                         class="u-checkbox__input w-checkbox"
                         :class="{

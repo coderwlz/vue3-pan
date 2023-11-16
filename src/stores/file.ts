@@ -31,8 +31,17 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const all = computed(() => {
-    return list.value.some((item) => item.is_active)
+    return (
+      list.value.filter((item) => item.is_active).length == list.value.length
+    )
   })
+
+  const setAll = () => {
+    const is = all.value
+    list.value.forEach((Item) => {
+      Item.is_active = !is
+    })
+  }
 
   const urlList = ref()
 
@@ -352,6 +361,7 @@ export const useFileStore = defineStore('file', () => {
     link,
     linkPwd,
     urlList,
-    imgList
+    imgList,
+    setAll
   }
 })

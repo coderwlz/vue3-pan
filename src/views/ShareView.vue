@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import subView from '@/components/share/sub.vue'
 import { storeToRefs } from 'pinia'
 import { sizeTostr, timestampToTime } from '@/utils'
 import noneView from '@/components/share/none.vue'
 import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
-
+import { Tooltip, message } from 'ant-design-vue'
 import { useLinkStore } from '@/stores/link'
 
 const linkStore = useLinkStore()
 linkStore.getList()
 
-const { list, all } = storeToRefs(linkStore)
+const { list, all, detail } = storeToRefs(linkStore)
 
 const copyLinks = (data: any) => {
   let inputs = document.createElement('input') //创建节点
@@ -21,9 +21,20 @@ const copyLinks = (data: any) => {
   document.body.appendChild(inputs) //渲染节点(要不然不起作用,可以添加隐藏属性)
   inputs.select() //选中节点
   let actions = document.execCommand('Copy') //指定复制命令(返回的是一个boolean类型)
-  // actions && Message({ type: 'success', message: '复制成功' })
+  actions && message.success('复制成功')
   inputs && inputs?.parentNode?.removeChild(inputs)
 }
+
+const clickItem = (item: any) => {
+  item.is_active = !item.is_active
+  linkStore.checkItem(item)
+}
+
+const title = computed(() => {
+  return linkStore.activeNum > 1
+    ? `共选中${linkStore.activeNum}个文件`
+    : '分享详情'
+})
 </script>
 <template>
   <main class="main">
@@ -42,143 +53,221 @@ const copyLinks = (data: any) => {
             <span class="cursor"> 全部文件 </span>
           </div>
         </div>
-        <div class="pan-table">
-          <div class="pan-table-header" v-if="list.length">
-            <table style="width: 100%">
-              <colgroup>
-                <col width="8%" />
-                <col width="45%" />
-                <col width="23%" />
-                <col width="22%" />
-              </colgroup>
-              <thead>
-                <tr class="table-header-row">
-                  <th class="table-header-select">
-                    <label
-                      class="u-checkbox is-checked hide-checkbox"
-                      :class="{
-                        'is-checked': all
-                      }"
-                      ><span
-                        class="u-checkbox__input w-checkbox"
+        <div class="share-link-body">
+          <div class="pan-table">
+            <div class="pan-table-header" v-if="list.length">
+              <table style="width: 100%">
+                <colgroup>
+                  <col width="8%" />
+                  <col width="45%" />
+                  <col width="23%" />
+                  <col width="22%" />
+                </colgroup>
+                <thead>
+                  <tr class="table-header-row">
+                    <th class="table-header-select">
+                      <label
+                        class="u-checkbox is-checked hide-checkbox"
                         :class="{
                           'is-checked': all
                         }"
-                        ><span class="u-checkbox__inner"></span></span
-                    ></label>
-                  </th>
-                  <th class="table-header-th">
-                    <div>
-                      <span>分享文件</span>
-                      <div><i></i><i></i></div>
-                    </div>
-                  </th>
-                  <th class="table-header-th">
-                    <div>
-                      <span>分享时间</span>
-                      <div></div>
-                    </div>
-                  </th>
-                  <th class="table-header-th">
-                    <div>
-                      <span>过期时间</span>
-                      <div></div>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          <div class="pan-table-body" v-if="list.length">
-            <table style="width: 100%">
-              <colgroup>
-                <col width="8%" />
-                <col width="45%" />
-                <col width="23%" />
-                <col width="22%" />
-              </colgroup>
-              <tbody>
-                <tr
-                  class="table-body-row cursor"
-                  v-for="item in list"
-                  :key="item.id"
-                  :class="{
-                    selected: item.is_active
-                  }"
-                >
-                  <td class="aichat-width">
-                    <label
-                      class="u-checkbox is-checked hide-checkbox"
-                      :class="{
-                        'is-checked': item.is_active
-                      }"
-                      @click="item.is_active = !item.is_active"
-                      ><span
-                        class="u-checkbox__input w-checkbox"
+                        @click="linkStore.setAll"
+                        ><span
+                          class="u-checkbox__input w-checkbox"
+                          :class="{
+                            'is-checked': all
+                          }"
+                          ><span class="u-checkbox__inner"></span></span
+                      ></label>
+                    </th>
+                    <th class="table-header-th">
+                      <div>
+                        <span>分享文件</span>
+                        <div><i></i><i></i></div>
+                      </div>
+                    </th>
+                    <th class="table-header-th">
+                      <div>
+                        <span>分享时间</span>
+                        <div></div>
+                      </div>
+                    </th>
+                    <th class="table-header-th">
+                      <div>
+                        <span>过期时间</span>
+                        <div></div>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <div class="pan-table-body" v-if="list.length">
+              <table style="width: 100%">
+                <colgroup>
+                  <col width="8%" />
+                  <col width="45%" />
+                  <col width="23%" />
+                  <col width="22%" />
+                </colgroup>
+                <tbody>
+                  <tr
+                    class="table-body-row cursor"
+                    v-for="item in list"
+                    :key="item.id"
+                    :class="{
+                      selected: item.is_active
+                    }"
+                    @click="linkStore.handleClickitem(item)"
+                  >
+                    <td class="aichat-width">
+                      <label
+                        class="u-checkbox is-checked hide-checkbox"
                         :class="{
                           'is-checked': item.is_active
                         }"
-                        ><span class="u-checkbox__inner"></span></span
-                    ></label>
-                  </td>
-                  <td class="pan-table_td">
-                    <div>
-                      <div draggable="true" style="display: flex">
-                        <div style="flex: 1">
-                          <img
-                            v-if="item.is_dir == 2"
-                            src="/src/assets/img/qita.png"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <img
-                            v-else
-                            src="/src/assets/img/folder.png"
-                            alt="share"
-                            class="file-icon"
-                          />
-                          <a class="filename text-ellip" :title="item.name">
-                            {{ item.name }}
-                          </a>
-                        </div>
-                        <div class="file-action">
-                          <div style="display: flex">
-                            <div style="margin-right: 5px">
-                              <x-copy-link
-                                class="file-action-icon"
-                                @click="copyLinks(item)"
-                              />
-                            </div>
-                            <div style="margin-right: 5px">
-                              <x-cancel-link
-                                class="file-action-icon"
-                                @click="linkStore.closeLink(item.lid)"
-                              />
+                        @click.stop="clickItem(item)"
+                        ><span
+                          class="u-checkbox__input w-checkbox"
+                          :class="{
+                            'is-checked': item.is_active
+                          }"
+                          ><span class="u-checkbox__inner"></span></span
+                      ></label>
+                    </td>
+                    <td class="pan-table_td">
+                      <div>
+                        <div draggable="true" style="display: flex">
+                          <div style="flex: 1">
+                            <img
+                              v-if="item.is_dir == 2"
+                              src="/src/assets/img/qita.png"
+                              alt="share"
+                              class="file-icon"
+                            />
+                            <img
+                              v-else
+                              src="/src/assets/img/folder.png"
+                              alt="share"
+                              class="file-icon"
+                            />
+                            <a class="filename text-ellip" :title="item.name">
+                              {{ item.name }}
+                            </a>
+                          </div>
+                          <div class="file-action">
+                            <div style="display: flex">
+                              <div style="margin-right: 5px">
+                                <Tooltip>
+                                  <template #title>复制链接</template>
+                                  <x-copy-link
+                                    class="file-action-icon"
+                                    @click="copyLinks(item)"
+                                  />
+                                </Tooltip>
+                              </div>
+                              <div style="margin-right: 5px">
+                                <Tooltip>
+                                  <template #title>取消分享</template>
+                                  <x-cancel-link
+                                    class="file-action-icon"
+                                    @click="linkStore.closeLink(item.lid)"
+                                  />
+                                </Tooltip>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <div class="wp-s-pan-list__time-column">
-                      <p class="">{{ timestampToTime(item.create_at) }}</p>
-                    </div>
-                  </td>
-                  <td class="pan-table_td">
-                    <section class="">
-                      {{
-                        item.expire_at != 0
-                          ? timestampToTime(item.expire_at)
-                          : '永久有效'
-                      }}
-                    </section>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td class="pan-table_td">
+                      <div class="wp-s-pan-list__time-column">
+                        <p class="">{{ timestampToTime(item.create_at) }}</p>
+                      </div>
+                    </td>
+                    <td class="pan-table_td">
+                      <section class="">
+                        {{
+                          item.expire_at != 0
+                            ? timestampToTime(item.expire_at)
+                            : '永久有效'
+                        }}
+                      </section>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <none-view v-else />
           </div>
-          <none-view v-else />
+          <div class="share-info">
+            <div class="detail__title">
+              {{ title }}
+            </div>
+            <div v-if="linkStore.showDetails" class="nd-share-content">
+              <div class="nd-share-content__divider title"></div>
+              <div class="nd-share-content__title text-ellip">
+                <img
+                  src="https://staticwx.cdn.bcebos.com/mini-program/images/ic_image_v2.png"
+                  class="nd-share-content__thumb"
+                /><span>{{ detail?.name }}</span>
+              </div>
+
+              <div class="nd-share-content__item">
+                <div class="nd-share-content__label">分享时间</div>
+                <div class="nd-share-content__value">
+                  {{ timestampToTime(detail?.create_at) }}
+                </div>
+              </div>
+              <div class="nd-share-content__item">
+                <div class="nd-share-content__label">有效期</div>
+                <div class="nd-share-content__value">
+                  {{
+                    detail?.expire_at != 0
+                      ? timestampToTime(detail?.expire_at)
+                      : '永久有效'
+                  }}
+                </div>
+              </div>
+              <div class="nd-share-content__item">
+                <div class="nd-share-content__label">提取码</div>
+                <div class="nd-share-content__value">{{ detail?.pwd }}</div>
+              </div>
+
+              <div class="nd-share-content__divider"></div>
+              <div class="nd-share-content__item">
+                <div class="nd-share-content__label">浏览</div>
+                <div class="nd-share-content__value">0次</div>
+              </div>
+              <!-- <div class="nd-share-content__item">
+                <div class="nd-share-content__label">保存</div>
+                <div class="nd-share-content__value">0次</div>
+              </div>
+              <div class="nd-share-content__item">
+                <div class="nd-share-content__label">下载</div>
+                <div class="nd-share-content__value">0次</div>
+              </div> -->
+            </div>
+            <div v-if="linkStore.showNone">
+              <div class="nd-detail__empty">
+                <img
+                  src="https://nd-static.bdstatic.com/m-static/v20-main/home/img/empty-folder.55c81ea2.png"
+                  class="img"
+                />
+                <p>选中文件，查看详情</p>
+              </div>
+              <div></div>
+            </div>
+            <div v-if="linkStore.activeNum > 1">
+              <div class="nd-detail__img bg">
+                <img
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABRUExURUxpcf/MOv/OP//JNP/DKf+4EP/XUP/CKf+6Ff++Hf/RQ//VS//TR//aVf+3Ef+9FP+5A//DJP/fi//14P/ln/+xDf/dZ//ief/Rcf/pvP/GSpk9oQ4AAAAKdFJOUwD////H4/8in2nKcBCgAAAER0lEQVR42u2ai5LbKgyGCyRO4luabb2393/QY5AAgbEtEtxp5/BjY4Ftfb/Y7Uy64cePqqqqqqqqqqqqqr9Xlx0dC79+gt4TGlDN6XYU/tSgull91xu1s2QrQQJ0jIWbTq2EcnrottBdt/sBDm4u+5zfKxgQXYuv/z1Tp8IGThzoSAfnS/kFGM05Yjgumg3gUtTBFdIHmAVZH+OIgY7Pp+u2bpecnwBwgGARlgpof2XrzPz3ct5Kkk0NdGWtwniQJr0Il+IGJsg8dxPEeMGINt2dcgxMySIcdbKxHs39NFGSmZzspI2mifF7gJmhv38X0IOYOO8bIOa/v34V0df35HRjGLDr9jm/GiZaBMHEF70XPvLpDFx5BqD+Hf3+4sutwZlv4O13Qb25tGwDj7eiemQbUJ9FpdgGrOXNBdXH3Nb0AS2Q/UC5a2CFuAFcwoBozveP6BMtewU2UhPGu2WEnGFu+sOzDgb3Kdpo10AaZCgfEQLbAIyQs6pdAzFk4OcuY2A4WP8nAw02F5hBGQNNENjOAAJc4AGeyTXQBDyM4qqww7DBx+F/l/ioE89AQywTFBwwh7nd/ZSGMBxYBvw6Do09B09LZvfjhZWFs30DmxpY88NGBs4KYIJhP9sTenEF/iEDnTlt37lLIQMddoBoKMK0jj4HT+KdfAPdMj/++YjAuw4ZcC7kJ1kGOsJ1C9hgZQlCE2Gtp5SbXQNYS/DusjCHTNa7Vj3XwGpl26l5yjJQBlnUQIZ6e+11CH/rnMNSBnpPoLzesxAYj5430Ls+lTsWFB4OjXYN9Ijo+o1S/LBbsFJeiBgG4jr6Lq7iFeUZOEB/wkA7N+jshB60oFIGWne2kB55COo9MVKGgTauqsVaTB8AVmCu8j7HQJjSlriufsdD7goE8AWoz4I9a+BFBJF82sCTMAOUUuovt2zgbkkTPG9AuqtNKm2MAxgbrI/d92wotgGbW+e1V4llQU4kShz4aKGWRAwD7pXWv2sv5JtDuYVc166BTfsFxDOAP8AixJdXoJAEdkcbENgLiIWbsN2LBgTphEMIC6Yx3jb3iTgGSIIwuSRTcBHCViuEPROSruMYEIKsIg6EryhKu0Kjo7wViJLIRHoZLKtcdZIUywCumIyrklmoFwwcqT9hQJn9F+ZqAmUvuhUxoHxPIBSjhMcGLyiWAfI8JbrSRFiWOUxoNp74DSjCHjjSEcOAogBPoSQY+7QujnF2zu+J2TdgagCS5TgEzCvCIKWKBU4EliDYNaBUgFCkPEGwIp5WKnhzmQYD3grgUtMlTCBU2um29rdwPJWWrf0dBFd1qPa/vL68injg1q/0BjDGJo5TDiO1x2xFZmsYZ9/XJdjCls94rG87Y+54um0AMP/jzt3v9VM3J+ZWolvWXrZxDCHrGtlb/y7nGMFlbOmUs+Pscj3/LCrmNqqsTa05qluEq6qqqqqqqqqq/mL9B15hMo40ijfcAAAAAElFTkSuQmCC"
+                  alt="folder"
+                  class="category u-file-icon u-file-icon--grid"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -219,7 +308,8 @@ const copyLinks = (data: any) => {
       }
     }
     .pan-table {
-      height: calc(100% - 40px);
+      flex: 1;
+      // height: calc(100% - 40px);
       table {
         border-collapse: collapse;
         border-spacing: 0;
@@ -408,5 +498,97 @@ const copyLinks = (data: any) => {
   padding-left: 22px;
   height: 32px;
   line-height: 32px;
+}
+.share-link-body {
+  display: flex;
+  height: calc(100% - 40px);
+}
+.share-info {
+  width: 272px;
+  margin: 0 16px;
+  height: 95%;
+  background: #f5f6fa;
+  padding: 16px 24px 24px 24px;
+  border-radius: 8px;
+  position: relative;
+}
+.detail__title {
+  display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  color: #03081a;
+  font-weight: 600;
+  padding-bottom: 15px;
+}
+.nd-share-content__divider.title {
+  margin: 0;
+}
+.nd-share-content__divider {
+  border-bottom: 1px solid #d4d7de;
+}
+.nd-share-content__title {
+  padding: 15px 0 7px;
+  width: 100%;
+  font-size: 14px;
+}
+.text-ellip {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.nd-share-content__thumb {
+  width: 20px;
+  height: 20px;
+}
+.nd-share-content__item {
+  padding: 7px 0;
+  line-height: 20px;
+}
+.nd-share-content__label {
+  color: #878c9c;
+}
+.nd-detail__empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  text-align: center;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+.nd-detail__empty img {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 8px;
+}
+.nd-detail__empty p {
+  color: #818999;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 12px;
+}
+.nd-detail__img.bg {
+  background: rgba(214, 220, 224, 0.15);
+}
+.nd-detail__img {
+  width: 100%;
+  min-height: 134px;
+  border-radius: 13px;
+  position: relative;
+}
+.nd-detail__img .category {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 128px;
+  height: 128px;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border-radius: 12.8px;
+}
+.u-file-icon {
+  display: inline-block;
+  vertical-align: middle;
 }
 </style>

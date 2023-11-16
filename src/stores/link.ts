@@ -11,8 +11,17 @@ export const useLinkStore = defineStore('link', () => {
   const list = ref<any[]>([])
 
   const all = computed(() => {
-    return list.value.some((item) => item.is_active)
+    return (
+      list.value.filter((item) => item.is_active).length == list.value.length
+    )
   })
+
+  const setAll = () => {
+    const is = all.value
+    list.value.forEach((Item) => {
+      Item.is_active = !is
+    })
+  }
 
   const getList = async () => {
     const res = await getShareList()
@@ -38,11 +47,51 @@ export const useLinkStore = defineStore('link', () => {
     await getList()
   }
 
+  const detail = ref<any>()
+  const showDetails = computed(() => {
+    const l = list.value.filter((item) => item.is_active)
+    return l.length == 1
+  })
+
+  const showNone = computed(() => {
+    return !list.value.some((item) => item.is_active)
+  })
+
+  const checkItem = (item: any) => {
+    if (showDetails.value) {
+      detail.value = item
+    }
+  }
+
+  const activeNum = computed(
+    () => list.value.filter((item) => item.is_active).length
+  )
+
+  const handleClickitem = (item: any) => {
+    if (showDetails.value && item.is_active) {
+      item.is_active = false
+      detail.value = ''
+      return
+    }
+    list.value.forEach((val) => {
+      val.is_active = false
+    })
+    item.is_active = true
+    detail.value = item
+  }
+
   return {
     list,
     getList,
     all,
     closeLink,
-    allClose
+    allClose,
+    setAll,
+    showDetails,
+    detail,
+    checkItem,
+    handleClickitem,
+    showNone,
+    activeNum
   }
 })
