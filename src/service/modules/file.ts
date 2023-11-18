@@ -47,6 +47,19 @@ export async function addHandleFoler(
   })
 }
 
+export async function editFile(
+  name: string,
+  id: string | undefined
+): Promise<any> {
+  return msiRequest.post({
+    url: '/api/edit-file',
+    data: {
+      name,
+      id
+    }
+  })
+}
+
 export async function getFileList(
   id?: string,
   type?: string | undefined
@@ -57,6 +70,12 @@ export async function getFileList(
       id,
       type
     }
+  })
+}
+
+export async function getDelList(): Promise<any> {
+  return msiRequest.get({
+    url: '/api/dellist'
   })
 }
 
@@ -73,6 +92,24 @@ export async function delFile(id: string): Promise<any> {
   return msiRequest.delete({
     url: '/api/del-file',
     params: {
+      id
+    }
+  })
+}
+
+export async function removeFile(id: string): Promise<any> {
+  return msiRequest.delete({
+    url: '/api/remove-file',
+    params: {
+      id
+    }
+  })
+}
+
+export async function resetFile(id: string): Promise<any> {
+  return msiRequest.post({
+    url: '/api/reset-file',
+    data: {
       id
     }
   })

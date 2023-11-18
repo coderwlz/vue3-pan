@@ -79,3 +79,29 @@ export const copyVal = (str: string) => {
   inputs && inputs?.parentNode?.removeChild(inputs)
   return !!actions
 }
+
+export function getTimeUntilExpiration(timestamp: number): string {
+  const now = new Date().getTime()
+  const timeUntilExpiration = timestamp - now
+
+  if (timeUntilExpiration <= 0) {
+    return '已过期'
+  }
+
+  const days = Math.floor(timeUntilExpiration / (1000 * 60 * 60 * 24))
+  if (days > 0) {
+    return `${days}天后过期`
+  }
+
+  const hours = Math.floor(timeUntilExpiration / (1000 * 60 * 60))
+  if (hours > 0) {
+    return `${hours}小时后过期`
+  }
+
+  return '1小时以内过期'
+}
+
+// // 使用示例
+// const expirationTimestamp = 1637366400000; // 假设这是一个时间戳
+// const timeLeft = getTimeUntilExpiration(expirationTimestamp);
+// console.log(timeLeft);

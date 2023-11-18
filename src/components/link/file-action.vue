@@ -11,7 +11,7 @@ const props = defineProps(['cId', 'showModel'])
 
 const { list, openFoler, success, level } = useFileActions({
   cId: props.cId,
-  ok: async (cId, target_id) => {
+  ok: async (cId: any, target_id: any) => {
     try {
       await fileCopy(cId, target_id)
       $message.success('保存成功')
@@ -56,7 +56,7 @@ const close = () => {
                     <span
                       class="nd-file-selector__nav-item"
                       v-for="item in level"
-                      :key="item.id"
+                      :key="item?.id"
                       @click="openFoler(item.id, item.name)"
                     >
                       <div class="nd-file-selector__nav-item-l">></div>

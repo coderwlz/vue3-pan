@@ -1,3 +1,20 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useFileStore } from '@/stores/file'
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
+import { useUploaderStore } from '@/stores/uploader'
+
+const router = useRouter()
+
+const route = useRoute()
+
+const uploaderStore = useUploaderStore()
+
+const fileStore = useFileStore()
+
+const { category } = storeToRefs(fileStore)
+</script>
 <template>
   <div class="wp-s-file-contain-list__empty">
     <div class="wp-s-main__empty">
@@ -10,13 +27,17 @@
         </div>
         <div class="u-empty__description">
           <span class="wp-s-main__empty-title">
-            当前列表为空，上传你的第一个文件吧
+            {{
+              category == 'del'
+                ? '您的回收站为空噢～'
+                : '当前列表为空，上传你的第一个文件吧'
+            }}
           </span>
         </div>
-        <div class="u-empty__bottom">
+        <div class="u-empty__bottom" v-if="category != 'del'">
           <div class="wp-s-main-empty-action">
             <div class="wp-s-main-empty-action__empty-body">
-              <div class="u-card is-never-shadow">
+              <div class="u-card is-never-shadow" @click="uploaderStore.open">
                 <div class="u-card__body">
                   <div
                     class="wp-s-main-empty-action__empty-body-action wp-s-main-empty-action__empty-upload"
@@ -33,7 +54,11 @@
                   </div>
                 </div>
               </div>
-              <div class="u-card is-never-shadow">
+              <div
+                class="u-card is-never-shadow"
+                v-if="category != '5'"
+                @click="fileStore.addFoler"
+              >
                 <div class="u-card__body">
                   <div class="wp-s-main-empty-action__empty-body-action">
                     <div class="u-image">
@@ -48,7 +73,7 @@
                   </div>
                 </div>
               </div>
-              <div class="u-card is-never-shadow">
+              <!-- <div class="u-card is-never-shadow">
                 <div class="u-card__body">
                   <div class="wp-s-main-empty-action__empty-body-action">
                     <div class="u-image">
@@ -62,7 +87,7 @@
                     >
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

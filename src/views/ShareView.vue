@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import subView from '@/components/share/sub.vue'
 import { storeToRefs } from 'pinia'
-import { sizeTostr, timestampToTime } from '@/utils'
+import { timestampToTime, getTimeUntilExpiration } from '@/utils'
 import noneView from '@/components/share/none.vue'
 import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
@@ -42,8 +42,12 @@ const title = computed(() => {
     <div class="main-layout">
       <div class="pan__body">
         <div class="pan__body_header">
-          <button class="upload u-button" v-if="all">
-            <X-cancel-link style="color: #fff" @click="linkStore.allClose" />
+          <button
+            class="upload u-button"
+            v-if="all"
+            @click="linkStore.allClose"
+          >
+            <X-cancel-link style="color: #fff" />
             取消分享
           </button>
           <div v-else>链接分享</div>
@@ -189,7 +193,7 @@ const title = computed(() => {
                       <section class="">
                         {{
                           item.expire_at != 0
-                            ? timestampToTime(item.expire_at)
+                            ? getTimeUntilExpiration(item.expire_at)
                             : '永久有效'
                         }}
                       </section>
@@ -223,8 +227,8 @@ const title = computed(() => {
                 <div class="nd-share-content__label">有效期</div>
                 <div class="nd-share-content__value">
                   {{
-                    detail?.expire_at != 0
-                      ? timestampToTime(detail?.expire_at)
+                    detail.expire_at != 0
+                      ? getTimeUntilExpiration(detail?.expire_at)
                       : '永久有效'
                   }}
                 </div>

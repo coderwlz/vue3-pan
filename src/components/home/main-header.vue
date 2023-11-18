@@ -7,15 +7,41 @@ const uploaderStore = useUploaderStore()
 
 const fileStore = useFileStore()
 fileStore.getList()
-const { list } = storeToRefs(fileStore)
+const { category } = storeToRefs(fileStore)
 </script>
 <template>
   <div class="main-header-tool">
     <div class="main-header-tool-left">
-      <button class="upload u-button" @click="uploaderStore.open">上传</button>
+      <button
+        v-if="category != 'del'"
+        class="upload u-button"
+        @click="uploaderStore.open"
+      >
+        上传
+      </button>
 
-      <button class="add-foler u-button" @click="fileStore.addFoler">
+      <button
+        v-if="category == 'all'"
+        class="add-foler u-button"
+        @click="fileStore.addFoler"
+      >
         新建文件夹
+      </button>
+
+      <button
+        v-if="category == 'del'"
+        class="upload u-button"
+        @click="fileStore.handleAllDel"
+      >
+        清空回收站
+      </button>
+
+      <button
+        v-if="category == 'del'"
+        class="add-foler u-button"
+        @click="fileStore.resetActive"
+      >
+        还原选中
       </button>
     </div>
     <div class="main-header-tool-right">

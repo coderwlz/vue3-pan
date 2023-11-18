@@ -9,7 +9,7 @@ import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
 import addLink from '@/components/home/add-link.vue'
 import { preview } from 'v-preview-image'
-import { Dropdown, Menu } from 'ant-design-vue'
+import { Dropdown, Menu, Divider } from 'ant-design-vue'
 
 const MenuItem = Menu.Item
 
@@ -27,6 +27,31 @@ const hideMenu = (item: any) => {
     item.showMenu = false
   }
 }
+
+const menuOpen = (item: any) => {
+  if (item.is_dir == 1) {
+    fileStore.openFoler(item.id, item.name)
+  } else {
+    fileStore.openFileView(item)
+  }
+}
+
+const editName = (item: any) => {
+  const [flag] = fileStore.list.filter((item) => item.is_edit)
+  if (flag) {
+    return
+  }
+  item.is_edit = true
+}
+
+const category_mao = {
+  del: '回收站',
+  all: '全部文件',
+  '1': '全部文档',
+  '2': '全部视频',
+  '3': '全部音频',
+  '4': '全部其他'
+} as any
 </script>
 
 <template>
@@ -44,7 +69,7 @@ const hideMenu = (item: any) => {
               }"
               @click="fileStore.openFoler('')"
             >
-              全部文件
+              {{ category_mao[category] }}
             </span>
             <span
               v-for="item in path"
@@ -195,7 +220,7 @@ const hideMenu = (item: any) => {
                             </div>
                           </div>
                           <div class="file-action">
-                            <div style="display: flex">
+                            <div style="display: flex" v-if="category != 'del'">
                               <div
                                 style="margin-right: 5px"
                                 @click="fileStore.openCreateLink(item)"
@@ -228,11 +253,24 @@ const hideMenu = (item: any) => {
                                 <x-yidong class="file-action-icon" />
                               </div>
                               <div
-                                v-if="item.is_dir == 2"
                                 style="margin-right: 5px"
-                                @click="fileStore.openFileView(item)"
+                                @click="menuOpen(item)"
                               >
                                 <x-dakai class="file-action-icon" />
+                              </div>
+                            </div>
+                            <div style="display: flex" v-else>
+                              <div
+                                style="margin-right: 5px"
+                                @click="fileStore.resetFileItem(item.id)"
+                              >
+                                <x-reset class="file-action-icon" />
+                              </div>
+                              <div
+                                style="margin-right: 5px"
+                                @click="fileStore.handRemoveFile(item.id)"
+                              >
+                                <x-shanchu class="file-action-icon" />
                               </div>
                             </div>
                           </div>
@@ -241,7 +279,13 @@ const hideMenu = (item: any) => {
                     </td>
                     <td class="pan-table_td">
                       <div class="wp-s-pan-list__time-column">
-                        <p class="">{{ timestampToTime(item.create_at) }}</p>
+                        <p class="">
+                          {{
+                            item.update_at
+                              ? timestampToTime(item.update_at)
+                              : timestampToTime(item.create_at)
+                          }}
+                        </p>
                       </div>
                     </td>
                     <td class="pan-table_td">
@@ -251,10 +295,73 @@ const hideMenu = (item: any) => {
                     </td>
                   </tr>
                   <template #overlay>
-                    <Menu>
-                      <menu-item key="1">打开</menu-item>
-                      <menu-item key="2">移动</menu-item>
-                      <menu-item key="3">3rd menu item</menu-item>
+                    <Menu v-if="category != 'del'" style="width: 120px">
+                      <menu-item key="1" @click="menuOpen(item)">
+                        <x-dakai class="file-action-icon" />
+                        打开
+                      </menu-item>
+                      <menu-item
+                        v-if="item.is_dir == 2"
+                        key="4"
+                        @click="fileStore.download(item.id)"
+                      >
+                        <x-download class="file-action-icon" />
+                        下载
+                      </menu-item>
+                      <menu-item
+                        key="5"
+                        @click="fileStore.openCreateLink(item)"
+                      >
+                        <x-fenxiang class="file-action-icon" />
+                        分享
+                      </menu-item>
+                      <Divider style="margin: 2px 0" />
+                      <menu-item
+                        key="3"
+                        @click="fileStore.openActionModel(item.id, 1)"
+                      >
+                        <x-fuzhi class="file-action-icon" />
+                        复制
+                      </menu-item>
+                      <menu-item
+                        key="2"
+                        @click="fileStore.openActionModel(item.id, 2)"
+                      >
+                        <x-yidong class="file-action-icon" />
+                        移动
+                      </menu-item>
+                      <menu-item key="7" @click="editName(item)">
+                        <x-rename
+                          class="file-action-icon"
+                          style="font-size: 12px"
+                        />
+                        重名名
+                      </menu-item>
+                      <Divider style="margin: 2px 0" />
+                      <menu-item
+                        key="6"
+                        @click="fileStore.openDelModel(item.id)"
+                      >
+                        <x-shanchu class="file-action-icon" />
+                        删除
+                      </menu-item>
+                    </Menu>
+                    <Menu v-else style="width: 120px">
+                      <menu-item
+                        key="1"
+                        @click="fileStore.resetFileItem(item.id)"
+                      >
+                        <x-reset class="file-action-icon" />
+                        还原
+                      </menu-item>
+                      <menu-item
+                        v-if="item.is_dir == 2"
+                        key="4"
+                        @click="fileStore.handRemoveFile(item.id)"
+                      >
+                        <x-shanchu class="file-action-icon" />
+                        彻底删除
+                      </menu-item>
                     </Menu>
                   </template>
                 </Dropdown>
@@ -265,7 +372,7 @@ const hideMenu = (item: any) => {
         </div>
       </div>
       <div class="pan__body" v-else>
-        <div class="img_body">
+        <div class="img_body" v-if="imgList?.length">
           <div
             class="content-item"
             v-for="(item, index) in imgList"
@@ -313,6 +420,7 @@ const hideMenu = (item: any) => {
             </div>
           </div>
         </div>
+        <none-view v-else />
       </div>
     </div>
   </main>

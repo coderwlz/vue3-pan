@@ -2,6 +2,11 @@
 import { ref } from 'vue'
 import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const route = useRoute()
 
 const fileStore = useFileStore()
 // fileStore.getList()
@@ -47,6 +52,12 @@ const open = (type: string) => {
   fileStore.parent_id = ''
   fileStore.path = []
   fileStore.getList()
+  router.push({
+    name: 'home',
+    query: {
+      category: type
+    }
+  })
 }
 
 const clickOpen = () => {
@@ -97,7 +108,14 @@ const clickOpen = () => {
       </div>
       <div class="nav-divider"></div>
 
-      <div class="file-item cursor" style="font-size: 14px; font-weight: 700">
+      <div
+        class="file-item cursor"
+        style="font-size: 14px; font-weight: 700"
+        @click="open('del')"
+        :class="{
+          'is-active': category == 'del'
+        }"
+      >
         回收站
       </div>
     </div>

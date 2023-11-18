@@ -4,7 +4,7 @@ import { getFolerList } from '@/service/modules/file'
 export const useFileActions = (option: any) => {
   const { ok, cId } = option
 
-  const list = ref([])
+  const list = ref<any>([])
 
   const target_id = ref<any>('1')
 

@@ -32,7 +32,7 @@ const { openDel } = storeToRefs(fileStore)
             />
             <p class="nd-delete__tip-confirm">确定删除所选的文件吗？</p>
             <p class="nd-delete__svip-text">
-              您是SVIP V2会员，删除的文件可在35天内通过回收站还原
+              删除的文件可在35天内通过回收站还原
             </p>
           </div>
         </div>

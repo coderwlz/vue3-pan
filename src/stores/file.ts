@@ -9,7 +9,11 @@ import {
   fileCopy,
   fileMove,
   fileContent,
-  addLink
+  addLink,
+  editFile,
+  getDelList,
+  removeFile,
+  resetFile
 } from '@/service/modules/file'
 import { getFileSuffix } from '@/utils'
 import { useRoute, useRouter } from 'vue-router'
@@ -49,6 +53,16 @@ export const useFileStore = defineStore('file', () => {
 
   const getList = async () => {
     const type = category.value === 'all' ? undefined : category.value
+    if (type == 'del') {
+      const res = await getDelList()
+      list.value = res.data.map((item: any) => {
+        return {
+          ...item,
+          is_active: false
+        }
+      })
+      return
+    }
     const res = await getFileList(parent_id.value || '1', type)
     if (res?.code === 200) {
       list.value = res.data.map((item: any) => {
@@ -99,7 +113,8 @@ export const useFileStore = defineStore('file', () => {
       is_edit: true,
       create_at: new Date().getTime(),
       is_dir: 1,
-      size: 0
+      size: 0,
+      isAdd: true
     })
   }
 
@@ -113,8 +128,11 @@ export const useFileStore = defineStore('file', () => {
     if (parent_id.value) {
       paths = JSON.stringify(path.value)
     }
-    const res = await addHandleFoler(flag.name, parent_id.value || '1', paths)
-    console.log('addFolerOnOk', res)
+    if (flag?.isAdd) {
+      await addHandleFoler(flag.name, parent_id.value || '1', paths)
+    } else {
+      await editFile(flag.name, flag.id)
+    }
     addFolerClose()
     getList()
   }
@@ -131,7 +149,12 @@ export const useFileStore = defineStore('file', () => {
     if (count == undefined) {
       return
     }
-    list.value.splice(count, 1)
+    const item = list.value[count]
+    item.is_edit = false
+    if (item?.isAdd) {
+      list.value.splice(count, 1)
+      return
+    }
   }
 
   const openFoler = (id: string, name?: string | undefined) => {
@@ -185,14 +208,42 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const handDelFile = async () => {
-    await delFile(delId.value)
+    await removeFile(delId.value)
+    // await delFile(delId.value)
     getList()
     handleCloseDel()
+  }
+
+  const handRemoveFile = async (id: string) => {
+    await delFile(id)
+    getList()
   }
 
   const handleCloseDel = () => {
     openDel.value = false
     delId.value = ''
+  }
+
+  // 回收站
+  const resetFileItem = async (id: string) => {
+    await resetFile(id)
+    getList()
+  }
+
+  const handleAllDel = async () => {
+    for (const item of list.value) {
+      await delFile(item.id)
+    }
+    getList()
+  }
+
+  const resetActive = async () => {
+    for (const item of list.value) {
+      if (item.is_active) {
+        await resetFile(item.id)
+      }
+    }
+    getList()
   }
 
   // 下载
@@ -362,6 +413,10 @@ export const useFileStore = defineStore('file', () => {
     linkPwd,
     urlList,
     imgList,
-    setAll
+    setAll,
+    handRemoveFile,
+    resetFileItem,
+    handleAllDel,
+    resetActive
   }
 })

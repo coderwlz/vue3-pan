@@ -31,6 +31,8 @@ declare module 'vue' {
     XFuzhi: typeof import('~icons/x/fuzhi')['default']
     XLinkTime: typeof import('~icons/x/link-time')['default']
     XQita: typeof import('~icons/x/qita')['default']
+    XRename: typeof import('~icons/x/rename')['default']
+    XReset: typeof import('~icons/x/reset')['default']
     XShanchu: typeof import('~icons/x/shanchu')['default']
     XShipin: typeof import('~icons/x/shipin')['default']
     XTupian: typeof import('~icons/x/tupian')['default']

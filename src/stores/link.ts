@@ -11,9 +11,12 @@ export const useLinkStore = defineStore('link', () => {
   const list = ref<any[]>([])
 
   const all = computed(() => {
-    return (
-      list.value.filter((item) => item.is_active).length == list.value.length
-    )
+    if (list.value.length) {
+      return (
+        list.value.filter((item) => item.is_active).length == list.value.length
+      )
+    }
+    return false
   })
 
   const setAll = () => {
