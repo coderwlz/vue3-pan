@@ -7,7 +7,7 @@ const uploaderStore = useUploaderStore()
 
 const fileStore = useFileStore()
 fileStore.getList()
-const { category } = storeToRefs(fileStore)
+const { category, q } = storeToRefs(fileStore)
 </script>
 <template>
   <div class="main-header-tool">
@@ -52,10 +52,17 @@ const { category } = storeToRefs(fileStore)
             autocomplete="off"
             placeholder="搜索我的文件"
             class="u-input__inner"
+            v-model="q"
+            @keydown.enter="fileStore.searchList"
           /><span class="u-input__suffix"
             ><span class="u-input__suffix-inner"
               ><p>
-                <span class="wp-s-search__search-text"> 搜索 </span>
+                <span
+                  class="wp-s-search__search-text"
+                  @click="fileStore.searchList"
+                >
+                  搜索
+                </span>
               </p></span
             ></span
           >

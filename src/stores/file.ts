@@ -13,10 +13,12 @@ import {
   editFile,
   getDelList,
   removeFile,
-  resetFile
+  resetFile,
+  search
 } from '@/service/modules/file'
 import { getFileSuffix } from '@/utils'
 import { useRoute, useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
 
 export const useFileStore = defineStore('file', () => {
   const route = useRoute()
@@ -28,6 +30,9 @@ export const useFileStore = defineStore('file', () => {
   const parent_id = ref((route.query.id as string) || '')
 
   const path = ref<any[]>([])
+
+  const q = ref('')
+  const isQ = ref(false)
 
   const category = ref('all')
   if (route.query?.category) {
@@ -50,6 +55,38 @@ export const useFileStore = defineStore('file', () => {
   const urlList = ref()
 
   const imgList = ref()
+
+  const searchList = async () => {
+    const type = category.value === 'all' ? undefined : category.value
+
+    if (q.value.length == 0) {
+      isQ.value = false
+    } else {
+      isQ.value = true
+    }
+    const res = await search(type, q.value)
+    if (res?.code === 200) {
+      list.value = res.data.map((item: any) => {
+        return {
+          ...item,
+          is_active: false
+        }
+      })
+      if (category.value == '5') {
+        urlList.value = res.data.map(
+          (item: any) => `/w/api/content?id=${item.id}`
+        )
+        imgList.value = res.data.map((item: any) => {
+          return {
+            src: `/w/api/thumbnail?id=${item.id}`,
+            ...item,
+            showMenu: false,
+            menuHover: false
+          }
+        })
+      }
+    }
+  }
 
   const getList = async () => {
     const type = category.value === 'all' ? undefined : category.value
@@ -161,7 +198,8 @@ export const useFileStore = defineStore('file', () => {
     parent_id.value = id
     console.log('id', id)
     console.log('name', name)
-
+    q.value = ''
+    isQ.value = false
     if (name == undefined) {
       path.value = []
       getList()
@@ -327,6 +365,7 @@ export const useFileStore = defineStore('file', () => {
   const openFileView = async (data: any) => {
     if (getFileSuffix(data.name) == 'mp4') {
       window.open(`#/view?mode=view&filename=${data.name}&file_id=${data.id}`)
+      return
     }
     if (
       img.includes(getFileSuffix(data.name)) ||
@@ -334,6 +373,7 @@ export const useFileStore = defineStore('file', () => {
       pdf.includes(getFileSuffix(data.name))
     ) {
       window.open(`#/view?mode=view&filename=${data.name}&file_id=${data.id}`)
+      return
     }
     if (
       xlsx.includes(getFileSuffix(data.name)) ||
@@ -341,13 +381,16 @@ export const useFileStore = defineStore('file', () => {
       docx.includes(getFileSuffix(data.name))
     ) {
       window.open(`#/view?mode=view&filename=${data.name}&file_id=${data.id}`)
+      return
     }
     if (getFileSuffix(data.name) == 'mp3') {
       const res = await getFileContent(data.id)
       const blob = res //处理文档流
       const link = URL.createObjectURL(blob)
       window.open(link)
+      return
     }
+    message.warning('暂不支持该类型预览')
   }
 
   // 分享
@@ -417,6 +460,9 @@ export const useFileStore = defineStore('file', () => {
     handRemoveFile,
     resetFileItem,
     handleAllDel,
-    resetActive
+    resetActive,
+    q,
+    isQ,
+    searchList
   }
 })

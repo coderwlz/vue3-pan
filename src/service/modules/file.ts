@@ -73,6 +73,19 @@ export async function getFileList(
   })
 }
 
+export async function search(
+  type: string | undefined,
+  q: string | undefined
+): Promise<any> {
+  return msiRequest.get({
+    url: '/api/search',
+    params: {
+      type,
+      q
+    }
+  })
+}
+
 export async function getDelList(): Promise<any> {
   return msiRequest.get({
     url: '/api/dellist'

@@ -15,7 +15,7 @@ const MenuItem = Menu.Item
 
 const fileStore = useFileStore()
 fileStore.getList()
-const { list, path, parent_id, all, category, urlList, imgList } =
+const { list, path, parent_id, all, category, urlList, imgList, q, isQ } =
   storeToRefs(fileStore)
 const img_type = ['gif', 'jpg', 'jpeg', 'bmp', 'tiff', 'tif', 'png', 'svg']
 const openImg = (current: any, list: any) => {
@@ -61,7 +61,7 @@ const category_mao = {
       <main-header />
       <div class="pan__body" v-if="category != '5'">
         <div class="pan__body_file_header">
-          <div class="file-header-title">
+          <div class="file-header-title" v-if="!isQ">
             <span
               class="cursor"
               :class="{
@@ -83,6 +83,7 @@ const category_mao = {
               > {{ item.name }}</span
             >
           </div>
+          <div class="file-header-title" v-else>搜索: {{ q }}</div>
         </div>
         <div class="pan-table">
           <div class="pan-table-header" v-if="list.length">
@@ -335,7 +336,7 @@ const category_mao = {
                           class="file-action-icon"
                           style="font-size: 12px"
                         />
-                        重名名
+                        重命名
                       </menu-item>
                       <Divider style="margin: 2px 0" />
                       <menu-item
