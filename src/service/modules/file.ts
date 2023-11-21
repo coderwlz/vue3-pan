@@ -1,10 +1,16 @@
 import { msiRequest } from '../index'
+import axios from 'axios'
 
-export async function upload(data: any, onUploadProgress: any): Promise<any> {
+export async function upload(
+  data: any,
+  onUploadProgress: any,
+  source: any
+): Promise<any> {
   return msiRequest.post({
     url: '/api/upload',
     data,
-    onUploadProgress
+    onUploadProgress,
+    cancelToken: source.token
   })
 }
 

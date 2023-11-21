@@ -196,7 +196,10 @@ const openFilePath = (item: any) => {
                             /></span>
                             <span
                               title="继续上传"
-                              v-if="item.status == 'paused'"
+                              v-if="
+                                item.status == 'paused' ||
+                                item.status == 'paused2'
+                              "
                               class="common-icon-container"
                               ><img
                                 @click="item.resume()"

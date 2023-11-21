@@ -70,6 +70,10 @@ const indicator = h(LoadingOutlined, {
   },
   spin: true
 })
+
+const handleError = (e: any, item: any) => {
+  item.img = ''
+}
 </script>
 
 <template>
@@ -198,12 +202,22 @@ const indicator = h(LoadingOutlined, {
                             >
                               <img
                                 v-if="
+                                  img_type.includes(getFileSuffix(item.name)) &&
+                                  item.img
+                                "
+                                :src="item.img"
+                                alt="share"
+                                class="file-icons"
+                                @error="handleError($event, item)"
+                              />
+                              <div
+                                v-else-if="
+                                  !item.img &&
                                   img_type.includes(getFileSuffix(item.name))
                                 "
-                                :src="`/w/api/thumbnail?id=${item.id}`"
                                 alt="share"
                                 class="file-icon"
-                              />
+                              ></div>
                               <div
                                 v-else-if="item.is_dir == 2"
                                 alt="share"
@@ -417,9 +431,6 @@ const indicator = h(LoadingOutlined, {
                           'background-image': `url(${item.src})`
                         }"
                       ></div>
-                      <div class="img_name">
-                        {{ item.name }}
-                      </div>
 
                       <div
                         @mouseover="item.showMenu = true"
@@ -489,13 +500,6 @@ const indicator = h(LoadingOutlined, {
                       >
                         <x-yidong class="file-action-icon" />
                         移动
-                      </menu-item>
-                      <menu-item key="7" @click="editName(item)">
-                        <x-rename
-                          class="file-action-icon"
-                          style="font-size: 12px"
-                        />
-                        重命名
                       </menu-item>
                       <Divider style="margin: 2px 0" />
                       <menu-item
@@ -641,6 +645,7 @@ const indicator = h(LoadingOutlined, {
             width: calc(100% - 35px);
             display: inline-block;
             margin-left: 3px;
+            color: #05082c;
             &:hover {
               color: #06a7ff;
             }
@@ -661,6 +666,10 @@ const indicator = h(LoadingOutlined, {
           background: url('/src/assets/img/qita.png');
           background-size: cover !important;
           display: inline-block;
+        }
+        .file-icons {
+          width: 32px;
+          height: 32px;
         }
         .pan-table_td {
           border-bottom: 1px solid #f7f8fa;
@@ -762,7 +771,7 @@ const indicator = h(LoadingOutlined, {
 .content-item {
   display: block;
   width: 128px;
-  height: 146px;
+  height: 128px;
   line-height: 128px;
   margin: 0 5px 5px 0;
   outline: none;
@@ -773,8 +782,8 @@ const indicator = h(LoadingOutlined, {
   cursor: pointer;
   position: relative;
   .img-container {
-    width: 128px;
-    height: 128px;
+    width: 100%;
+    height: 100%;
     -webkit-transition: opacity 0.15s linear;
     transition: opacity 0.15s linear;
     background-position: 50%;

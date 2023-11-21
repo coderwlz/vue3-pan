@@ -117,7 +117,8 @@ export const useFileStore = defineStore('file', () => {
         list.value = res.data.map((item: any) => {
           return {
             ...item,
-            is_active: false
+            is_active: false,
+            img: `/w/api/thumbnail?id=${item.id}`
           }
         })
         if (category.value == '5') {
@@ -306,19 +307,22 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const resetActive = async () => {
-    for (const item of list.value) {
-      if (item.is_active) {
-        await resetFile(item.id)
+    loading.value = true
+    try {
+      for (const item of list.value) {
+        if (item.is_active) {
+          await resetFile(item.id)
+        }
       }
+      await getList()
+    } finally {
+      loading.value = false
     }
-    getList()
   }
 
   // 下载
   const download = async (id: string) => {
-    const url =
-      window.location.origin +
-      `/w/api/download?id=${id}&timeout=${new Date().getTime()}`
+    const url = window.location.origin + `/w/api/download?id=${id}`
     window.open(url)
   }
 

@@ -9,6 +9,7 @@ import {
   verify
 } from '@/service/modules/file'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 export const useUploaderStore = defineStore('uploader', () => {
   const list = ref<any[]>([])
@@ -100,6 +101,7 @@ export class File {
   path: string
   err: string
   parent_id: string
+  abort: any
   constructor(file: any, path: string, parent_id: string) {
     this.size = file.size
     this.name = file.name
@@ -117,7 +119,8 @@ export class File {
 
   static STATUS = {
     PENDING: 'pending',
-    PAUSED: 'paused', // todo 暂停之后再做
+    PAUSED: 'paused',
+    PAUSED2: 'paused2',
     CHECKSUM: 'checksum', // 计算
     CHECKSUM2: 'checksum2',
     MERGING: 'merging',
@@ -158,6 +161,7 @@ export class File {
       this.progress = 1
       const store = useFileStore()
       store.getList()
+      this._fileInspect()
       return
     }
 
@@ -172,8 +176,8 @@ export class File {
 
   async pause() {
     try {
-      this._updateStatus(STATUS.PAUSED)
-      // await this.abort()
+      this.abort()
+      this._updateStatus(STATUS.PAUSED2)
     } catch (e) {
       this._updateStatus(STATUS.ERROR)
     }
@@ -199,7 +203,7 @@ export class File {
     this._updateStatus(STATUS.CHECKSUM)
     const reader = new FileReader()
     const hash = await this._getFileChunk(reader, CHUNK_SIZE, file)
-    if (this.status == STATUS.PAUSED) {
+    if (this.status == STATUS.PAUSED || this.status == STATUS.PAUSED2) {
       return
     }
     // this.progress = 0
@@ -230,7 +234,7 @@ export class File {
   }
 
   async upload(): Promise<any> {
-    if (this.status == STATUS.PAUSED) {
+    if (this.status == STATUS.PAUSED || this.status == STATUS.PAUSED2) {
       return
     }
     const chunk = this.chunkList[this.chunkIndex]
@@ -239,17 +243,25 @@ export class File {
     formData.append('md5', this.hash)
     formData.append('fileName', this.name)
     formData.append('index', this.chunkIndex + '')
-
+    const CancelToken = axios.CancelToken
+    const source = CancelToken.source()
     let loaded = 0
     // arr.push(
-    await uploads(formData, (progressEvent: any) => {
-      // if (this.chunkIndex == count) {
-      loaded = progressEvent.loaded
-      // }
-    })
+    this.abort = () => {
+      source.cancel()
+    }
+    await uploads(
+      formData,
+      (progressEvent: any) => {
+        // if (this.chunkIndex == count) {
+        loaded = progressEvent.loaded
+        // }
+      },
+      source
+    )
     this.onProcess(loaded)
     // count++
-    if (this.status == STATUS.PAUSED) {
+    if (this.status == STATUS.PAUSED || this.status == STATUS.PAUSED2) {
       return
     }
     this.chunkIndex++
@@ -275,6 +287,7 @@ export class File {
       })
       store.getList()
       this._updateStatus(STATUS.SUCCESS)
+      this._fileInspect()
     }
   }
 
@@ -352,7 +365,7 @@ export class File {
     let count = 0
     for (let i = 0; i < store.list.length; i++) {
       const item = store.list[i]
-      const STATUS_MAP = ['uploading', 'merging', 'decoding']
+      const STATUS_MAP = ['uploading', 'merging']
       if (STATUS_MAP.includes(item.status)) {
         count++
       }
@@ -375,7 +388,7 @@ export class File {
     const store = useUploaderStore()
     for (let i = 0; i < store.list.length; i++) {
       const item = store.list[i]
-      const STATUS_MAP = ['paused']
+      const STATUS_MAP = ['paused', 'checksum2']
       if (STATUS_MAP.includes(item.status)) {
         item.start()
         return
