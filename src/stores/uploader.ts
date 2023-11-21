@@ -8,11 +8,13 @@ import {
   merge as merges,
   verify
 } from '@/service/modules/file'
+import { useRouter } from 'vue-router'
 
 export const useUploaderStore = defineStore('uploader', () => {
   const list = ref<any[]>([])
 
   const store = useFileStore()
+  const router = useRouter()
 
   const isFolder = ref(false) //
 
@@ -53,7 +55,11 @@ export const useUploaderStore = defineStore('uploader', () => {
     input.onchange = async (event: any) => {
       const result = event.target
       for (let i = 0; i < result.files.length; i++) {
-        const obj = new File(result.files[i], join(store.path))
+        const obj = new File(
+          result.files[i],
+          join(store.path),
+          store.parent_id || '1'
+        )
         list.value.push(obj)
         list.value[list.value.length - 1].start()
       }
@@ -63,7 +69,19 @@ export const useUploaderStore = defineStore('uploader', () => {
     input.click()
   }
 
-  return { list, open, close }
+  const openFilePath = (file: any) => {
+    router.push({
+      name: 'home',
+      query: {
+        id: file.parent_id
+      }
+    })
+    store.parent_id = file.parent_id
+    store.getList(file.parent_id)
+    store.getPath()
+  }
+
+  return { list, open, close, openFilePath }
 })
 
 export class File {
@@ -81,7 +99,8 @@ export class File {
   _prevUploadedSize = 0
   path: string
   err: string
-  constructor(file: any, path: string) {
+  parent_id: string
+  constructor(file: any, path: string, parent_id: string) {
     this.size = file.size
     this.name = file.name
     this.status = 'pending'
@@ -91,6 +110,7 @@ export class File {
     this.hash = ''
     this.path = path
     this.err = ''
+    this.parent_id = parent_id
   }
 
   static SliceSize = 1024 * 1024 * 10
@@ -110,9 +130,9 @@ export class File {
   }
 
   async verifyFile(hash: string, name: string) {
-    const store = useFileStore()
-    const parent_id = store.parent_id || '1'
-    const res = await verify(hash, name, this.path, parent_id)
+    // const store = useFileStore()
+    // const parent_id = store.parent_id || '1'
+    const res = await verify(hash, name, this.path, this.parent_id)
     return res.data.presence
   }
 
@@ -205,7 +225,6 @@ export class File {
       ((uploaded - this._prevUploadedSize) / timeSpan) * 1000,
       0
     )
-    console.log('this.currentSpeed', this.currentSpeed)
 
     this._prevUploadedSize = uploaded
   }
@@ -295,7 +314,6 @@ export class File {
       })
       count += size
     }
-    console.log('createFileChunk -> fileChunkList', fileChunkList)
     return fileChunkList
   }
 
@@ -372,13 +390,11 @@ export class File {
     }
     const store = useFileStore()
     const flag = store.list.some(({ name }) => {
-      console.log('this.name , name', this.name, name)
       return this.name == name
     })
     if (flag) {
       this._updateStatus(STATUS.ERROR)
       this.err = '文件已存在'
-      console.log('文件已存在')
     }
     return flag
   }

@@ -24,9 +24,7 @@ export default {
     images() {
       const name = getQueryString('filename')
       const extend = name && getExtend(name)
-      console.log('extend', extend, this.image)
       if (extend == 'svg') {
-        console.log('---------------------')
         const byteCharacters = atob(this.image.split(',')[1])
         const blob = new Blob([byteCharacters], { type: 'image/svg+xml' })
         const fileURL = URL.createObjectURL(blob)

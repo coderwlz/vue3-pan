@@ -88,7 +88,6 @@ const getContent = async (id) => {
     }
     loading.value = true
     let data = await fileStore.getFileContent(id)
-    console.log('data', data)
     handleChange(data)
     loading.value = false
   }

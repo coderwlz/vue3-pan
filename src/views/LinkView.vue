@@ -2,7 +2,7 @@
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { getLinkInfo, closeShareLink } from '@/service/modules/link'
-import { sizeTostr, timestampToTime } from '@/utils'
+import { sizeTostr, timestampToTime, getFileSuffix } from '@/utils'
 import { getExtend, readBuffer, render } from '@/components/onlinefile/util.js'
 import { useFileStore } from '@/stores/file'
 import noneView from '@/components/home/none.vue'
@@ -30,19 +30,15 @@ const list = ref<any>([])
 const bodyInfo = ref()
 const init = async () => {
   const data = await getLinkInfo(key.value as string, pwd.value as string)
-  console.log('data', data)
 
   if (data.code === 200) {
     isOk.value = true
     info.value = data.data
-    console.log('info.value', info.value)
     cId.value = info.value?.linkInfo?.file_id
   } else {
     isOk.value = false
   }
   if (info.value?.file?.is_dir != 1) {
-    console.log('info.value?.linkInfo', info.value?.linkInfo)
-
     await getContent(info.value?.linkInfo?.file_id, info.value?.linkInfo?.name)
 
     // 判断是否是office三件套
@@ -103,7 +99,6 @@ const getContent = async (id: any, filename: string) => {
     }
     loading.value = true
     let data = await fileStore.getFileContent(id)
-    console.log('data', data)
     handleChange(data)
     loading.value = false
   }
@@ -232,11 +227,15 @@ const getRoot = () => {
                 alt="share"
                 class="file-icon"
               /> -->
-              <img
+              <div
+                class="file-icon"
+                :class="`${getFileSuffix(info?.file?.name)}`"
+              ></div>
+              <!-- <img
                 src="/src/assets/img/folder.png"
                 alt="share"
                 class="file-icon"
-              />
+              /> -->
               {{ info?.file?.name }}
             </div>
             <div class="link_file_action">
@@ -471,6 +470,9 @@ const getRoot = () => {
 .file-icon {
   width: 32px;
   height: 32px;
+  background: url('/src/assets/img/qita.png');
+  background-size: cover !important;
+  display: inline-block;
 }
 
 .slide-show-other-infos {

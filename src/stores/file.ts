@@ -16,7 +16,7 @@ import {
   resetFile,
   search
 } from '@/service/modules/file'
-import { getFileSuffix } from '@/utils'
+import { getFileSuffix, groupByDate } from '@/utils'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 
@@ -33,7 +33,7 @@ export const useFileStore = defineStore('file', () => {
 
   const q = ref('')
   const isQ = ref(false)
-
+  const loading = ref(false)
   const category = ref('all')
   if (route.query?.category) {
     category.value = route.query?.category as string
@@ -45,6 +45,10 @@ export const useFileStore = defineStore('file', () => {
     )
   })
 
+  const isActive = computed(() => {
+    return list.value.some((item) => item.is_active)
+  })
+
   const setAll = () => {
     const is = all.value
     list.value.forEach((Item) => {
@@ -54,73 +58,85 @@ export const useFileStore = defineStore('file', () => {
 
   const urlList = ref()
 
-  const imgList = ref()
+  const imgList = ref<any>()
 
   const searchList = async () => {
-    const type = category.value === 'all' ? undefined : category.value
+    loading.value = true
+    try {
+      const type = category.value === 'all' ? undefined : category.value
 
-    if (q.value.length == 0) {
-      isQ.value = false
-    } else {
-      isQ.value = true
-    }
-    const res = await search(type, q.value)
-    if (res?.code === 200) {
-      list.value = res.data.map((item: any) => {
-        return {
-          ...item,
-          is_active: false
-        }
-      })
-      if (category.value == '5') {
-        urlList.value = res.data.map(
-          (item: any) => `/w/api/content?id=${item.id}`
-        )
-        imgList.value = res.data.map((item: any) => {
+      if (q.value.length == 0) {
+        isQ.value = false
+      } else {
+        isQ.value = true
+      }
+      const res = await search(type, q.value)
+      if (res?.code === 200) {
+        list.value = res.data.map((item: any) => {
           return {
-            src: `/w/api/thumbnail?id=${item.id}`,
             ...item,
-            showMenu: false,
-            menuHover: false
+            is_active: false
           }
         })
+        if (category.value == '5') {
+          urlList.value = res.data.map(
+            (item: any) => `/w/api/content?id=${item.id}`
+          )
+          imgList.value = res.data.map((item: any) => {
+            return {
+              src: `/w/api/thumbnail?id=${item.id}`,
+              ...item,
+              showMenu: false,
+              menuHover: false
+            }
+          })
+          imgList.value = groupByDate(imgList.value)
+        }
       }
+    } finally {
+      loading.value = false
     }
   }
 
-  const getList = async () => {
+  const getList = async (id?: string) => {
+    loading.value = true
     const type = category.value === 'all' ? undefined : category.value
-    if (type == 'del') {
-      const res = await getDelList()
-      list.value = res.data.map((item: any) => {
-        return {
-          ...item,
-          is_active: false
-        }
-      })
-      return
-    }
-    const res = await getFileList(parent_id.value || '1', type)
-    if (res?.code === 200) {
-      list.value = res.data.map((item: any) => {
-        return {
-          ...item,
-          is_active: false
-        }
-      })
-      if (category.value == '5') {
-        urlList.value = res.data.map(
-          (item: any) => `/w/api/content?id=${item.id}`
-        )
-        imgList.value = res.data.map((item: any) => {
+    try {
+      if (type == 'del') {
+        const res = await getDelList()
+        list.value = res.data.map((item: any) => {
           return {
-            src: `/w/api/thumbnail?id=${item.id}`,
             ...item,
-            showMenu: false,
-            menuHover: false
+            is_active: false
           }
         })
+        return
       }
+      const res = await getFileList(id || parent_id.value || '1', type)
+      if (res?.code === 200) {
+        list.value = res.data.map((item: any) => {
+          return {
+            ...item,
+            is_active: false
+          }
+        })
+        if (category.value == '5') {
+          urlList.value = res.data.map(
+            (item: any) => `/w/api/content?id=${item.id}`
+          )
+          imgList.value = res.data.map((item: any) => {
+            return {
+              src: `/w/api/thumbnail?id=${item.id}`,
+              ...item,
+              showMenu: false,
+              menuHover: false
+            }
+          })
+          imgList.value = groupByDate(imgList.value)
+        }
+      }
+    } finally {
+      loading.value = false
     }
   }
 
@@ -157,7 +173,6 @@ export const useFileStore = defineStore('file', () => {
 
   const addFolerOnOk = async () => {
     const [flag] = list.value.filter((item) => item.is_edit)
-    console.log('flag', flag)
     let paths = ''
     if (!flag) {
       return
@@ -196,8 +211,6 @@ export const useFileStore = defineStore('file', () => {
 
   const openFoler = (id: string, name?: string | undefined) => {
     parent_id.value = id
-    console.log('id', id)
-    console.log('name', name)
     q.value = ''
     isQ.value = false
     if (name == undefined) {
@@ -252,6 +265,18 @@ export const useFileStore = defineStore('file', () => {
     handleCloseDel()
   }
 
+  const delAllFile = async () => {
+    loading.value = true
+    try {
+      for (const item of list.value) {
+        await removeFile(item.id)
+      }
+      await getList()
+    } finally {
+      loading.value = false
+    }
+  }
+
   const handRemoveFile = async (id: string) => {
     await delFile(id)
     getList()
@@ -269,10 +294,15 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const handleAllDel = async () => {
-    for (const item of list.value) {
-      await delFile(item.id)
+    loading.value = true
+    try {
+      for (const item of list.value) {
+        await delFile(item.id)
+      }
+      await getList()
+    } finally {
+      loading.value = false
     }
-    getList()
   }
 
   const resetActive = async () => {
@@ -411,8 +441,6 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const addLinks = async (data: any) => {
-    console.log('addLinks', data)
-
     const res = await addLink(linkFileInfo.value.id, data.exprie_at, data.pwd)
     linkPwd.value = res.data.pwd
     link.value =
@@ -463,6 +491,10 @@ export const useFileStore = defineStore('file', () => {
     resetActive,
     q,
     isQ,
-    searchList
+    searchList,
+    getPath,
+    delAllFile,
+    isActive,
+    loading
   }
 })

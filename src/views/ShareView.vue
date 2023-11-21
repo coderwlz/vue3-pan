@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import subView from '@/components/share/sub.vue'
 import { storeToRefs } from 'pinia'
-import { timestampToTime, getTimeUntilExpiration } from '@/utils'
+import { timestampToTime, getTimeUntilExpiration, getFileSuffix } from '@/utils'
 import noneView from '@/components/share/none.vue'
 import delFile from '@/components/home/del-file.vue'
 import fileAction from '@/components/home/file-action.vue'
@@ -143,12 +143,12 @@ const title = computed(() => {
                       <div>
                         <div draggable="true" style="display: flex">
                           <div style="flex: 1">
-                            <img
+                            <div
                               v-if="item.is_dir == 2"
-                              src="/src/assets/img/qita.png"
                               alt="share"
                               class="file-icon"
-                            />
+                              :class="`${getFileSuffix(item.name)}`"
+                            ></div>
                             <img
                               v-else
                               src="/src/assets/img/folder.png"
@@ -415,6 +415,9 @@ const title = computed(() => {
         .file-icon {
           width: 32px;
           height: 32px;
+          background: url('/src/assets/img/qita.png');
+          background-size: cover !important;
+          display: inline-block;
         }
         .pan-table_td {
           border-bottom: 1px solid #f7f8fa;

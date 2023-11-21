@@ -17,7 +17,6 @@ const props = defineProps({
   }
 })
 const { file_id } = toRefs(props)
-console.log(file_id, 'file_id')
 
 const errTxt = ref('')
 
@@ -25,7 +24,6 @@ const src = ref('')
 
 const init = async () => {
   const res = await officeView(file_id.value)
-  console.log('res', res)
   if (res.data?.url) {
     src.value = res.data.url
   }

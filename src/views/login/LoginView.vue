@@ -12,7 +12,6 @@ const formData = ref({
 
 const submit = async (e: any) => {
   e.preventDefault()
-  console.log(formData.value)
   let res = await login(formData.value)
   if (res.code == 200) {
     router.push('/home')

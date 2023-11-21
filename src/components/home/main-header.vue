@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useUploaderStore } from '@/stores/uploader'
 import { useFileStore } from '@/stores/file'
 import { storeToRefs } from 'pinia'
@@ -26,6 +25,14 @@ const { category, q } = storeToRefs(fileStore)
         @click="fileStore.addFoler"
       >
         新建文件夹
+      </button>
+
+      <button
+        v-if="category != 'del' && category != '5' && fileStore.isActive"
+        class="add-foler u-button"
+        @click="fileStore.delAllFile"
+      >
+        删除
       </button>
 
       <button

@@ -105,3 +105,20 @@ export function getTimeUntilExpiration(timestamp: number): string {
 // const expirationTimestamp = 1637366400000; // 假设这是一个时间戳
 // const timeLeft = getTimeUntilExpiration(expirationTimestamp);
 // console.log(timeLeft);
+
+export function groupByDate(arr: any) {
+  const result = { length: 0 } as any
+  arr.forEach((item: any) => {
+    const date = new Date(item.create_at)
+    const key = `${date.getFullYear()}年${
+      date.getMonth() + 1
+    }月${date.getDate()}日`
+    if (!result[key]) {
+      result[key] = [item]
+    } else {
+      result[key].push(item)
+    }
+    result.length++
+  })
+  return result
+}

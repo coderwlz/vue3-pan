@@ -134,3 +134,28 @@ ul {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.file-icon.exe {
+  background: url('/src/assets/img/exe.png') !important;
+}
+.file-icon.txt {
+  background: url('/src/assets/img/txt.png') !important;
+}
+.file-icon.ppt,
+.file-icon.pptx {
+  background: url('/src/assets/img/ppt.png') !important;
+}
+.file-icon.doc,
+.file-icon.docx {
+  background: url('/src/assets/img/word.png') !important;
+}
+.file-icon.zip {
+  background: url('/src/assets/img/zip.png') !important;
+}
+.file-icon.xlsx,
+.file-icon.xls {
+  background: url('/src/assets/img/xlsx.png') !important;
+}
+.file-icon.pdf {
+  background: url('/src/assets/img/pdf.png') !important;
+}
