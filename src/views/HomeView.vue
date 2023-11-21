@@ -235,7 +235,7 @@ const handleError = (e: any, item: any) => {
                                 class="filename text-ellip"
                                 v-if="!item.is_edit"
                                 :title="item.name"
-                                @click="fileStore.openFoler(item.id, item.name)"
+                                @click="menuOpen(item)"
                               >
                                 {{ item.name }}
                               </a>
