@@ -25,6 +25,10 @@ const submit = async (e: any) => {
     message.error('请输入密码')
     return
   }
+  if (!formData.value.nickname && type.value != 'login') {
+    message.error('请输入昵称')
+    return
+  }
   if (!formData.value.email && type.value != 'login') {
     message.error('请输入邮箱')
     return
