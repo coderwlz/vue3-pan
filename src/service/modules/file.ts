@@ -1,5 +1,4 @@
 import { msiRequest } from '../index'
-import axios from 'axios'
 
 export async function upload(
   data: any,

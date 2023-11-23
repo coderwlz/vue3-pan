@@ -19,8 +19,11 @@ import {
 import { getFileSuffix, groupByDate } from '@/utils'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
 
 export const useFileStore = defineStore('file', () => {
+  const userStore = useUserStore()
+
   const route = useRoute()
 
   const router = useRouter()
@@ -112,7 +115,7 @@ export const useFileStore = defineStore('file', () => {
         })
         return
       }
-      const res = await getFileList(id || parent_id.value || '1', type)
+      const res = await getFileList(id || parent_id.value || '', type)
       if (res?.code === 200) {
         list.value = res.data.map((item: any) => {
           return {
@@ -182,7 +185,11 @@ export const useFileStore = defineStore('file', () => {
       paths = JSON.stringify(path.value)
     }
     if (flag?.isAdd) {
-      await addHandleFoler(flag.name, parent_id.value || '1', paths)
+      await addHandleFoler(
+        flag.name,
+        parent_id.value || userStore.user.id,
+        paths
+      )
     } else {
       await editFile(flag.name, flag.id)
     }
@@ -334,8 +341,8 @@ export const useFileStore = defineStore('file', () => {
   const target_id = ref()
   const action_type = ref()
   const getActionList = async (id?: string | undefined) => {
-    target_id.value = id || '1'
-    const res = await getFolerList(id || '1')
+    target_id.value = id || userStore.user.id || ''
+    const res = await getFolerList(id || userStore.user.id || '')
     if (res?.code === 200) {
       actionList.value = res.data
     }
@@ -363,9 +370,15 @@ export const useFileStore = defineStore('file', () => {
 
   const actionOnOk = async () => {
     if (action_type.value == 1) {
-      await fileCopy(cId.value, target_id.value ?? (parent_id.value || '1'))
+      await fileCopy(
+        cId.value,
+        target_id.value ?? (parent_id.value || userStore.user.id)
+      )
     } else {
-      await fileMove(cId.value, target_id.value ?? (parent_id.value || '1'))
+      await fileMove(
+        cId.value,
+        target_id.value ?? (parent_id.value || userStore.user.id)
+      )
     }
     closeActionModel()
     await getList()

@@ -2,6 +2,10 @@
 import { RouterView } from 'vue-router'
 import headerView from './cpns/header.vue'
 import navView from './cpns/nav.vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+userStore.getUserInfo()
 </script>
 <template>
   <div class="pan">

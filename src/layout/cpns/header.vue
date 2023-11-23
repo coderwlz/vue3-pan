@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useUploaderStore } from '@/stores/uploader'
-import { storeToRefs } from 'pinia'
 import { sizeTostr, getFileSuffix, renderSize } from '@/utils'
 import { useElementHover } from '@vueuse/core'
-import { Badge } from 'ant-design-vue'
+import { Badge, message, Avatar } from 'ant-design-vue'
+import { logout } from '@/service/modules/login'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+const router = useRouter()
+
 const myHoverableElement = ref()
 const isHovered = useElementHover(myHoverableElement)
 
@@ -70,6 +76,16 @@ onUnmounted(() => {
 const openFilePath = (item: any) => {
   isShowList.value = false
   uploaderStore.openFilePath(item)
+}
+
+const logouts = async () => {
+  const { code } = await logout()
+  if (code == 200) {
+    message.success('退出成功')
+    router.push('/login')
+  } else {
+    message.error('退出失败')
+  }
 }
 </script>
 
@@ -237,7 +253,17 @@ const openFilePath = (item: any) => {
       </Badge>
 
       <div>
-        <img class="avater cursor" src="/src/assets/img/avater.webp" alt="" />
+        <Avatar class="avater cursor">
+          {{
+            userStore?.user?.nickname
+              ? userStore?.user?.nickname.slice(0, 1)
+              : ''
+          }}
+        </Avatar>
+        <!-- <img class="avater cursor" src="/src/assets/img/avater.webp" alt="" /> -->
+        <div class="nickname" :title="userStore?.user?.nickname">
+          {{ userStore?.user?.nickname }}
+        </div>
       </div>
       <div ref="myHoverableElement" class="ellipsis cursor">
         <x-ellipsis-v class="icons cursor" />
@@ -245,6 +271,7 @@ const openFilePath = (item: any) => {
         <div class="ellipsis-body" v-if="isHovered">
           <div class="ellipsis-item">系统通知</div>
           <div class="ellipsis-item">问题反馈</div>
+          <div class="ellipsis-item" @click="logouts">退出登录</div>
         </div>
       </div>
     </div>
@@ -492,7 +519,7 @@ a {
 .ellipsis-body {
   position: absolute;
   width: 130px;
-  height: 74px;
+  height: 106px;
   padding: 5px 4px;
   background: #fff;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.16);
@@ -550,5 +577,14 @@ a {
     width: 100%;
     height: 100%;
   }
+}
+.nickname {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  cursor: default;
+  margin-left: 6px;
 }
 </style>

@@ -1,21 +1,65 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { login } from '@/service/modules/login'
+import { computed, ref } from 'vue'
+import { login, signup } from '@/service/modules/login'
 import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
+import { Base64 } from 'js-base64'
 
 const router = useRouter()
 
 const formData = ref({
   username: '',
-  password: ''
+  password: '',
+  email: '',
+  nickname: ''
 })
-
+const type = ref('login')
 const submit = async (e: any) => {
   e.preventDefault()
-  let res = await login(formData.value)
-  if (res.code == 200) {
-    router.push('/home')
+
+  if (!formData.value.username) {
+    message.error('请输入用户名')
+    return
   }
+  if (!formData.value.password) {
+    message.error('请输入密码')
+    return
+  }
+  if (!formData.value.email && type.value != 'login') {
+    message.error('请输入邮箱')
+    return
+  }
+  const pwd = Base64.encode(formData.value.password)
+  // console.log(Base64.decode(pwd))
+  // MTIzNDU2
+  let res = {} as any
+  if (type.value == 'login') {
+    res = await login({
+      ...formData.value,
+      password: pwd
+    })
+    if (res.code == 200) {
+      router.push('/home')
+    } else {
+      message.error(res.message)
+    }
+  } else {
+    res = await signup({
+      ...formData.value,
+      password: pwd
+    })
+    if (res.code == 200) {
+      message.success('注册成功')
+    }
+  }
+}
+
+const typeStr = computed(() => {
+  return type.value == 'login' ? '登录' : '注册'
+})
+
+const changeType = () => {
+  type.value = type.value == 'login' ? 'signup' : 'login'
 }
 </script>
 <template>
@@ -34,7 +78,7 @@ const submit = async (e: any) => {
       <div class="login">
         <div class="login-body">
           <form>
-            <h1>账号登录</h1>
+            <h1>账号{{ typeStr }}</h1>
             <div>
               <label for="username">
                 <input
@@ -43,6 +87,16 @@ const submit = async (e: any) => {
                   class="wl-input"
                   v-model="formData.username"
                   placeholder="账号：admin"
+                />
+              </label>
+            </div>
+            <div v-if="type != 'login'">
+              <label for="nickname">
+                <input
+                  type="text"
+                  class="wl-input"
+                  v-model="formData.nickname"
+                  placeholder="请输入昵称"
                 />
               </label>
             </div>
@@ -56,9 +110,25 @@ const submit = async (e: any) => {
                 />
               </label>
             </div>
+            <div v-if="type != 'login'">
+              <label for="email">
+                <input
+                  type="text"
+                  class="wl-input"
+                  v-model="formData.email"
+                  placeholder="请输入邮箱"
+                />
+              </label>
+            </div>
+
+            <div class="u-link">
+              <a @click="changeType">{{
+                type == 'login' ? '没有账号去注册?' : '已有账号去登录'
+              }}</a>
+            </div>
             <div>
               <button class="u-button login-btn" type="submit" @click="submit">
-                登录
+                {{ typeStr }}
               </button>
             </div>
           </form>
@@ -165,5 +235,11 @@ const submit = async (e: any) => {
 }
 h1 {
   text-align: center;
+}
+.u-link {
+  margin: 0 0 15px 0;
+  text-align: right;
+  color: #09aaff;
+  cursor: pointer;
 }
 </style>

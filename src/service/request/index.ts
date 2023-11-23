@@ -30,8 +30,8 @@ class MsiRequest {
       }
     )
     this.instance.interceptors.response.use(
-      (result) => {
-        return result.data
+      (result: any) => {
+        return result.data || result.response.data
       },
       (error) => {
         return error
