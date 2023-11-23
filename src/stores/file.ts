@@ -461,7 +461,11 @@ export const useFileStore = defineStore('file', () => {
     const res = await addLink(linkFileInfo.value.id, data.exprie_at, data.pwd)
     linkPwd.value = res.data.pwd
     link.value =
-      window.location.origin + '#/link/' + res.data.key + '?pwd=' + res.data.pwd
+      window.location.origin +
+      '/#/link/' +
+      res.data.key +
+      '?pwd=' +
+      res.data.pwd
     isLinkOver.value = true
   }
 

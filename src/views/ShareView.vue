@@ -17,7 +17,7 @@ const { list, all, detail } = storeToRefs(linkStore)
 const copyLinks = (data: any) => {
   let inputs = document.createElement('input') //创建节点
   inputs.value =
-    window.location.origin + '#/link/' + data.key + '?pwd=' + data.pwd //给节点赋值
+    window.location.origin + '/#/link/' + data.key + '?pwd=' + data.pwd //给节点赋值
   document.body.appendChild(inputs) //渲染节点(要不然不起作用,可以添加隐藏属性)
   inputs.select() //选中节点
   let actions = document.execCommand('Copy') //指定复制命令(返回的是一个boolean类型)

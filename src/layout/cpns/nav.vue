@@ -56,7 +56,7 @@ const open = (path: string) => {
             <p class="wp-s-aside-nav__main-item-text text-ellip">收发</p>
           </div></a
         >
-
+        <!--
         <a
           href="javascript:;"
           active-class="is-active"
@@ -92,7 +92,7 @@ const open = (path: string) => {
             />
             <p class="wp-s-aside-nav__main-item-text text-ellip">消息</p>
           </div></a
-        >
+        > -->
       </div>
     </div>
   </div>

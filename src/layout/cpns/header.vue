@@ -82,7 +82,8 @@ const logouts = async () => {
   const { code } = await logout()
   if (code == 200) {
     message.success('退出成功')
-    router.push('/login')
+    window.location.href = '#/login'
+    // router.push('/login')
   } else {
     message.error('退出失败')
   }

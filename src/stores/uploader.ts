@@ -10,8 +10,11 @@ import {
 } from '@/service/modules/file'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { useUserStore } from '@/stores/user'
 
 export const useUploaderStore = defineStore('uploader', () => {
+  const userStore = useUserStore()
+
   const list = ref<any[]>([])
 
   const store = useFileStore()
@@ -59,7 +62,7 @@ export const useUploaderStore = defineStore('uploader', () => {
         const obj = new File(
           result.files[i],
           join(store.path),
-          store.parent_id || '1'
+          store.parent_id || userStore.user.id
         )
         list.value.push(obj)
         list.value[list.value.length - 1].start()
@@ -283,7 +286,7 @@ export class File {
         fileName: this.name,
         fileChunkNum: File.SliceSize,
         path: this.path,
-        parent_id: store.parent_id || '1'
+        parent_id: this.parent_id
       })
       store.getList()
       this._updateStatus(STATUS.SUCCESS)

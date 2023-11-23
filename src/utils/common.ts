@@ -56,6 +56,9 @@ export function timestampToTime(timestamp: number) {
 
 // 获取文件后缀
 export const getFileSuffix = (name: string) => {
+  if (!name) {
+    return ''
+  }
   const dot = name.lastIndexOf('.')
   return name.substr(dot + 1)
 }

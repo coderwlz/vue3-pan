@@ -2,14 +2,23 @@
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { getLinkInfo, closeShareLink } from '@/service/modules/link'
-import { sizeTostr, timestampToTime, getFileSuffix } from '@/utils'
+import {
+  sizeTostr,
+  timestampToTime,
+  getFileSuffix,
+  getTimeUntilExpiration
+} from '@/utils'
 import { getExtend, readBuffer, render } from '@/components/onlinefile/util.js'
 import { useFileStore } from '@/stores/file'
 import noneView from '@/components/home/none.vue'
 import useCurrentInstance from '@/hooks/useCurrentInstance'
 import fileAction from '@/components/link/file-action.vue'
 import { useFileList } from '@/hooks/useFileList'
+import { Avatar } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore()
+userStore.getUserInfo()
 const { $message } = useCurrentInstance()
 const fileStore = useFileStore()
 
@@ -239,7 +248,10 @@ const getRoot = () => {
               {{ info?.file?.name }}
             </div>
             <div class="link_file_action">
-              <span class="g-button" @click="cancelLink"
+              <span
+                class="g-button"
+                v-if="userStore?.user?.id == info?.user?.id"
+                @click="cancelLink"
                 ><x-cancel-link /> 取消分享</span
               >
               <span class="g-button" @click="download"><x-down /> 下载</span>
@@ -247,8 +259,13 @@ const getRoot = () => {
             </div>
           </div>
           <div class="slide-show-other-infos">
-            <x-link-time /> <span>2023-10-14 20:23</span>
-            <span>过期时间：7天后</span>
+            <x-link-time />
+            <span>{{ timestampToTime(info?.linkInfo.create_at) }}</span>
+            <span
+              >过期时间：{{
+                getTimeUntilExpiration(info?.linkInfo.expire_at)
+              }}</span
+            >
           </div>
         </div>
         <div class="show_body" ref="output">
@@ -360,7 +377,21 @@ const getRoot = () => {
           </div>
         </div>
       </div>
-      <div class="bd_right"></div>
+      <div class="bd_right">
+        <div class="avatar">
+          <Avatar
+            class="avater cursor"
+            size="large"
+            :style="{ backgroundColor: '#06a7ff' }"
+          >
+            {{ info?.user?.nickname ? info?.user?.nickname.slice(0, 1) : '' }}
+          </Avatar>
+        </div>
+        <div class="user-info">
+          <div>{{ info.user.username }}</div>
+          <p>{{ info.user.nickname }}</p>
+        </div>
+      </div>
     </div>
   </div>
   <file-action
@@ -448,7 +479,7 @@ const getRoot = () => {
     width: 215px;
     flex-shrink: 0;
     height: 100%;
-    background: #fff;
+    background: #f3f8ff;
   }
 }
 .g-button {
@@ -621,5 +652,33 @@ const getRoot = () => {
 .show_body_header_item-l {
   display: inline-block;
   margin-left: 5px;
+}
+.avatar {
+  text-align: center;
+  padding: 15px;
+}
+.user-info {
+  text-align: center;
+  div {
+    color: #333;
+    font-size: 14px;
+    display: inline-block;
+    max-width: 99px;
+    word-break: break-all;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+  }
+  p {
+    width: 160px;
+    color: #666;
+    line-height: 20px;
+    margin: 0 auto;
+    word-break: break-all;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 </style>
