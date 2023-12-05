@@ -49,8 +49,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/w': {
-        // target: 'http://59.110.7.8:3000',
-        target: 'http://localhost:3000',
+        target: 'http://59.110.7.8:3000',
+        // target: 'http://localhost:3000',
         rewrite: (path) => path.replace(/^\/w/, '')
       }
     }
